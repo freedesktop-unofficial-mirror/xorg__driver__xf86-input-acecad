@@ -23,7 +23,7 @@
  *
  *
  */
-/* $XFree86$ */
+/* $XFree86: xc/programs/Xserver/hw/xfree86/input/acecad/acecad.c,v 1.5 2003/11/05 20:56:29 alanh Exp $ */
 
 #define _ACECAD_C_
 /*****************************************************************************
