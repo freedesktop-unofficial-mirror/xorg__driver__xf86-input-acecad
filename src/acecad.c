@@ -810,7 +810,7 @@ QueryHardware (AceCadPrivatePtr priv)
 	XisbBlockDuration (priv->buffer, 1000000);
 	NewPacket (priv);
 
-	/*xf86Msg(X_CONFIG, "Acecad Tablet init envoyé \n");*/
+	/*xf86Msg(X_CONFIG, "Acecad Tablet init envoyÃ© \n");*/
 
 	if ((AceCadGetPacket (priv) == Success))
 	{
