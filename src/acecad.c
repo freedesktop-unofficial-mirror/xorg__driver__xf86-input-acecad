@@ -72,7 +72,7 @@
 #define MAX_EVENTS 50
 
 
-InputDriverRec ACECAD = 
+_X_EXPORT InputDriverRec ACECAD = 
 {
 	1,
 	"acecad",
@@ -99,7 +99,11 @@ static XF86ModuleVersionInfo VersionRec =
 };
 
 
-XF86ModuleData acecadModuleData = { &VersionRec, SetupProc, TearDownProc};
+_X_EXPORT XF86ModuleData acecadModuleData = {
+	&VersionRec,
+	SetupProc,
+	TearDownProc
+};
 
 /*****************************************************************************
  *	Function Definitions
