@@ -304,9 +304,6 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
   SetupProc_fail:
 	if ((local) && (local->fd))
 		xf86CloseSerial (local->fd);
-	if (local)
-		xf86DeleteInput (local, 0);
-
 	if ((priv) && (priv->buffer))
 		XisbFree (priv->buffer);
 	if (priv)
