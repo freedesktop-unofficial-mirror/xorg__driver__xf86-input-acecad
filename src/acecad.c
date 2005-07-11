@@ -25,6 +25,10 @@
  */
 /* $XFree86: xc/programs/Xserver/hw/xfree86/input/acecad/acecad.c,v 1.4 2003/10/30 00:40:45 dawes Exp $ */
 
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
 #define _ACECAD_C_
 /*****************************************************************************
  *	Standard Headers
