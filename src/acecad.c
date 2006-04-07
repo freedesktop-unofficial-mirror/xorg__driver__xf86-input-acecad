@@ -48,12 +48,14 @@
 #include <misc.h>
 #include <xf86.h>
 #define NEED_XF86_TYPES
-#include <xf86_ansic.h>
 #include <xf86_OSproc.h>
 #include <xisb.h>
 #include <xf86Xinput.h>
 #include <exevents.h>
 #include <xf86Module.h>
+
+#include <string.h>
+#include <stdio.h>
 
 /*****************************************************************************
  *	Local Headers
@@ -74,7 +76,6 @@
 
 /* max number of input events to read in one read call */
 #define MAX_EVENTS 50
-
 
 _X_EXPORT InputDriverRec ACECAD = 
 {
