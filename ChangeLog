@@ -2,7 +2,7 @@
 
 	* configure.ac:
 	* src/acecad.c:
-	Unlibcwrap and bump server version requirement.
+	Unlibcwrap and bump server version requirement.  Bump to 1.1.0.
 
 2005-12-20  Kevin E. Martin  <kem-at-freedesktop-dot-org>
 
