@@ -37,6 +37,10 @@
 #ifdef LINUX_INPUT
 #include <asm/types.h>
 #include <linux/input.h>
+#ifndef EV_SYN
+#define EV_SYN EV_RST
+#define SYN_REPORT 0
+#endif
 #ifdef BUS_PCI
 #undef BUS_PCI
 #endif
@@ -663,6 +667,10 @@ USBReadInput (LocalDevicePtr local)
 	 event<(struct input_event *)(eventbuf+len); event++) {
 	 
 		switch (event->type) {
+		case EV_SYN: /* 2.6.x */
+			if (event->code != SYN_REPORT)
+				xf86Msg(X_ERROR, "UNKNOWN EV_SYN code %d\n", event->code);
+			break;
 		case EV_ABS:
 		    switch (event->code) {
 		    case ABS_X:
@@ -703,12 +711,16 @@ USBReadInput (LocalDevicePtr local)
 		    }
 		    break; /* EV_KEY */
 		default:
-		    xf86Msg(X_ERROR, "UNKNOWN event type/code=%d/%d\n", event->type, event->code);
+		    xf86Msg(X_ERROR, "UNKNOWN event type/code %d/%d\n", event->type, event->code);
 		} /* switch event->type */
 
-		/* ABS_MISC is the event terminator */
-		if (event->type != EV_ABS || event->code != ABS_MISC) {
-		    continue;
+		/* Linux Kernel 2.6.x sends EV_SYN/SYN_REPORT as an event terminator,
+		 * whereas 2.4.x sends EV_ABS/ABS_MISC. We have to support both.
+		 */
+		if (!(  (event->type == EV_SYN && event->code == SYN_REPORT) ||
+			(event->type == EV_ABS && event->code == ABS_MISC)
+		)) {
+			continue;
 		}
 
 		if (prox)
