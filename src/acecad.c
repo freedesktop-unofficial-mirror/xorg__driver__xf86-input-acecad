@@ -169,10 +169,11 @@ IsUSBLine(int fd)
     SYSCALL(err = ioctl(fd, EVIOCGVERSION, &version));
     
     if (!err) {
-	xf86Msg(X_CONFIG,"Kernel Input driver version is %d.%d.%d\n",
+	xf86Msg(X_PROBED, "Kernel Input driver version is %d.%d.%d\n",
 	       version >> 16, (version >> 8) & 0xff, version & 0xff);
 	return 1;
     } else {
+	xf86Msg(X_PROBED, "No Kernel Input driver found\n");
 	return 0;
     }
 }
@@ -184,6 +185,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 	LocalDevicePtr local = xf86AllocateInput(drv, 0);
 	AceCadPrivatePtr priv = xcalloc (1, sizeof (AceCadPrivateRec));
 	int speed;
+	int msgtype;
 	char *s;
 
 	if ((!local) || (!priv))
@@ -216,7 +218,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 	local->fd = xf86OpenSerial (local->options);
 	if (local->fd == -1)
 	{
-		xf86Msg(X_ERROR,"AceCad driver unable to open device\n");
+		xf86Msg(X_ERROR, "AceCad driver unable to open device\n");
 		goto SetupProc_fail;
 	}
 	xf86ErrorFVerb( 6, "tty port opened successfully\n" );
@@ -239,7 +241,13 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
 		local->read_input = ReadInput;
 		
-		speed = xf86SetIntOption(local->options, "ReportSpeed", 85 );
+		msgtype = X_DEFAULT;
+		if (xf86FindOptionValue(local->options, "ReportSpeed")) {
+			msgtype = X_CONFIG;
+			speed = xf86SetIntOption(local->options, "ReportSpeed", 85 );
+		} else {
+			speed = 85;
+		}
 
 		switch (speed)
 		{
@@ -258,10 +266,11 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 		default:
 			priv->acecadReportSpeed = 'R';
 			speed = 85;
-			xf86Msg(X_CONFIG, "Acecad Tablet: ReportSpeed possible values:\n 120, 85, 10, 2 \n");         
+			xf86Msg(X_ERROR, "Acecad Tablet: ReportSpeed value %d invalid. Possible values: 120, 85, 10, 2. Defaulting to 85\n", speed);
+			msgtype = X_DEFAULT;
 		}
 
-		xf86Msg(X_CONFIG, "Acecad Tablet report %d points/s\n", speed);         
+		xf86Msg(msgtype, "Acecad Tablet report %d points/s\n", speed);
 
 		priv->buffer = XisbNew (local->fd, 200);
 
@@ -270,12 +279,13 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 		 */
 		if (QueryHardware(priv) != Success)
 		{
-			xf86Msg(X_ERROR,"Unable to query/initialize AceCad hardware.\n");
+			xf86Msg(X_ERROR, "Unable to query/initialize AceCad hardware.\n");
 			goto SetupProc_fail;
 		}
 	}
 
 	s = xf86FindOptionValue(local->options, "Mode");
+	msgtype = s ? X_CONFIG : X_DEFAULT;
 	if (s && (xf86NameCmp(s, "Relative") == 0))
 	{
 		priv->flags = priv->flags & ~ABSOLUTE_FLAG;
@@ -285,7 +295,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 		priv->flags = priv->flags | ABSOLUTE_FLAG;
 	}
 
-	xf86Msg(X_CONFIG, "Acecad Tablet is in %s mode\n",(priv->flags & ABSOLUTE_FLAG) ? "absolute" : "relative");         
+	xf86Msg(msgtype, "Acecad Tablet is in %s mode\n", (priv->flags & ABSOLUTE_FLAG) ? "absolute" : "relative");
 	DBG (9, XisbTrace (priv->buffer, 1));
 
 	local->history_size = xf86SetIntOption(local->options , "HistorySize", 0);
@@ -355,7 +365,7 @@ DeviceOn (DeviceIntPtr dev)
 	LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
 	AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
-	xf86Msg(X_CONFIG, "Acecad Tablet Device On\n");
+	xf86Msg(X_INFO, "Acecad Tablet Device On\n");
 
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd == -1)
@@ -375,7 +385,7 @@ DeviceOn (DeviceIntPtr dev)
 			}
 
 		/*Rets qu'a l'envoyer a la tablette */
-		sprintf(buffer, "%s%c%c%c%c", acecad_initstr, priv->acecadReportSpeed ,ACECAD_INCREMENT, 32 + priv->acecadInc, (priv->flags & ABSOLUTE_FLAG)? ACECAD_ABSOLUTE: ACECAD_RELATIVE);
+		sprintf(buffer, "%s%c%c%c%c", acecad_initstr, priv->acecadReportSpeed, ACECAD_INCREMENT, 32 + priv->acecadInc, (priv->flags & ABSOLUTE_FLAG)? ACECAD_ABSOLUTE: ACECAD_RELATIVE);
 		XisbWrite (priv->buffer, (unsigned char *)buffer, strlen(buffer));
 	}
 	
@@ -412,7 +422,7 @@ DeviceOff (DeviceIntPtr dev)
 static Bool
 DeviceClose (DeviceIntPtr dev)
 {
-	xf86Msg(X_CONFIG, "Acecad Tablet Device Close\n");
+	xf86Msg(X_INFO, "Acecad Tablet Device Close\n");
 	return (Success);
 }
 
@@ -420,7 +430,7 @@ static void
 ControlProc(DeviceIntPtr	device,
 		   PtrCtrl	*ctrl)
 {
-	xf86Msg(X_CONFIG, "Acecad Tablet Control Proc\n");
+	xf86Msg(X_INFO, "Acecad Tablet Control Proc\n");
 }
 
 static Bool
@@ -432,7 +442,7 @@ DeviceInit (DeviceIntPtr dev)
 	unsigned char map[] =
 	{0, 1, 2, 3};
 
-	xf86Msg(X_CONFIG, "Acecad Tablet Device Init\n");
+	xf86Msg(X_INFO, "Acecad Tablet Device Init\n");
 
 	/* 3 boutons */
 	if (InitButtonClassDeviceStruct (dev, 3, map) == FALSE)
@@ -517,7 +527,7 @@ DeviceInit (DeviceIntPtr dev)
 			priv->acecadInc = 1;
 	}
 
-	xf86Msg(X_CONFIG, "Acecad Tablet Increment: %d\n",priv->acecadInc);
+	xf86Msg(X_INFO, "Acecad Tablet Increment: %d\n", priv->acecadInc);
 
 	return (Success);
 }
@@ -530,7 +540,7 @@ ReadInput (LocalDevicePtr local)
 	int is_core_pointer, is_absolute;
 	AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
-	/*xf86Msg(X_CONFIG, "Acecad Tablet Read Input\n");*/
+	/*xf86Msg(X_INFO, "Acecad Tablet Read Input\n");*/
 
 	is_absolute = (priv->flags & ABSOLUTE_FLAG);
 	is_core_pointer = xf86IsCorePointer(local->dev);
@@ -573,7 +583,7 @@ ReadInput (LocalDevicePtr local)
 			if (!(priv->acecadOldProximity))
 				if (!is_core_pointer)
 				{
-					/*xf86Msg(X_CONFIG, "Acecad Tablet ProxIN %d %d %d\n",x, y, z);*/
+					/*xf86Msg(X_INFO, "Acecad Tablet ProxIN %d %d %d\n",x, y, z);*/
 					xf86PostProximityEvent(local->dev, 1, 0, 3 , x, y, z);
 				}
 
@@ -582,7 +592,7 @@ ReadInput (LocalDevicePtr local)
 			{
 				if (is_absolute || priv->acecadOldProximity)
 				{
-					/*xf86Msg(X_CONFIG, "Acecad Tablet Motion %d %d %d\n", x, y, z);*/
+					/*xf86Msg(X_INFO, "Acecad Tablet Motion %d %d %d\n", x, y, z);*/
 					xf86PostMotionEvent(local->dev, is_absolute, 0, 3, x, y, z);
 				}
 			}
@@ -599,7 +609,7 @@ ReadInput (LocalDevicePtr local)
 					id=ffs(delta);
 					delta &= ~(1 << (id-1));
 
-					/*xf86Msg(X_CONFIG, "Acecad Tablet Button %d 0x%x\n",id,(buttons&(1<<(id-1))));*/
+					/*xf86Msg(X_INFO, "Acecad Tablet Button %d 0x%x\n",id,(buttons&(1<<(id-1))));*/
 					xf86PostButtonEvent(local->dev, is_absolute, id, (buttons&(1<<(id-1))), 0, 3, x, y,z);
 				}
 			}
@@ -615,13 +625,13 @@ ReadInput (LocalDevicePtr local)
 			if (!is_core_pointer)
 				if (priv->acecadOldProximity)
 				{
-					/*xf86Msg(X_CONFIG, "Acecad Tablet ProxOUT %d %d %d\n",x, y, z);*/
+					/*xf86Msg(X_INFO, "Acecad Tablet ProxOUT %d %d %d\n",x, y, z);*/
 					xf86PostProximityEvent(local->dev, 0, 0, 3, x,y,z);
 				}
 			priv->acecadOldProximity = 0;
 		}
 	}
-	/*xf86Msg(X_CONFIG, "Acecad Tablet Sortie Read Input\n");*/
+	/*xf86Msg(X_INFO, "Acecad Tablet Sortie Read Input\n");*/
 }
 
 #ifdef LINUX_INPUT
@@ -693,7 +703,7 @@ USBReadInput (LocalDevicePtr local)
 		    }
 		    break; /* EV_KEY */
 		default:
-		    xf86Msg(X_ERROR, "UNKNOWN event->code=%d\n", event->code);
+		    xf86Msg(X_ERROR, "UNKNOWN event type/code=%d/%d\n", event->type, event->code);
 		} /* switch event->type */
 
 		/* ABS_MISC is the event terminator */
@@ -744,7 +754,7 @@ USBReadInput (LocalDevicePtr local)
 		priv->acecadOldZ = z;
 		priv->acecadOldProximity = prox;
 	}
-	/*xf86Msg(X_CONFIG, "Acecad Tablet Sortie Read Input\n");*/
+	/*xf86Msg(X_INFO, "Acecad Tablet Sortie Read Input\n");*/
 }
 #endif
 
@@ -828,12 +838,12 @@ QueryHardware (AceCadPrivatePtr priv)
 		priv->acecadMaxX = (int)priv->packet[1] + ((int)priv->packet[2] << 7);
 		priv->acecadMaxY = (int)priv->packet[3] + ((int)priv->packet[4] << 7);
 		priv->acecadMaxZ = 512;
-		xf86Msg(X_CONFIG, "Acecad Tablet MaxX:%d MaxY:%d\n",priv->acecadMaxX,priv->acecadMaxY);
+		xf86Msg(X_INFO, "Acecad Tablet MaxX:%d MaxY:%d\n",priv->acecadMaxX,priv->acecadMaxY);
 	}
 	else
 		return (!Success);
 		
-	/*xf86Msg(X_CONFIG, "Acecad Tablet query hardware fini \n");*/
+	/*xf86Msg(X_INFO, "Acecad Tablet query hardware fini \n");*/
 	return (Success);
 }
 
@@ -854,7 +864,7 @@ USBQueryHardware (LocalDevicePtr local)
 	char		name[256] = "Unknown";
 
 	ioctl(local->fd, EVIOCGNAME(sizeof(name)), name);
-	xf86Msg(X_CONFIG, "Kernel Input device name: \"%s\"\n", name);
+	xf86Msg(X_PROBED, "Kernel Input device name: \"%s\"\n", name);
 
 	memset(bit, 0, sizeof(bit));
 	ioctl(local->fd, EVIOCGBIT(0, EV_MAX), bit[0]);
@@ -883,7 +893,7 @@ USBQueryHardware (LocalDevicePtr local)
 		}
 	}
     
-	xf86Msg(X_CONFIG, "Acecad Tablet MaxX:%d MaxY:%d MaxZ:%d\n",priv->acecadMaxX,priv->acecadMaxY,priv->acecadMaxZ);
+	xf86Msg(X_PROBED, "Acecad Tablet MaxX:%d MaxY:%d MaxZ:%d\n", priv->acecadMaxX, priv->acecadMaxY,priv->acecadMaxZ);
 	return (Success);
 }
 #endif
@@ -923,7 +933,7 @@ AceCadGetPacket (AceCadPrivatePtr priv)
 			count=ACECAD_PACKET_SIZE-1;
 			while(count-- && (c = XisbRead(priv->buffer))>=0)
 				{
-				/*xf86Msg(X_CONFIG, "Push %2.2x\n",(char) c);*/
+				/*xf86Msg(X_INFO, "Push %2.2x\n",(char) c);*/
 				priv->packet[priv->packeti++] = c;
 				}
 			XisbBlockDuration (priv->buffer, 0);
