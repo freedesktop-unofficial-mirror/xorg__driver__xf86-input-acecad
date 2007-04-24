@@ -47,7 +47,9 @@
 
 #include <misc.h>
 #include <xf86.h>
+#ifndef NEED_XF86_TYPES
 #define NEED_XF86_TYPES
+#endif
 #include <xf86_OSproc.h>
 #include <xisb.h>
 #include <xf86Xinput.h>
@@ -56,6 +58,10 @@
 
 #include <string.h>
 #include <stdio.h>
+
+#ifdef LINUX_INPUT
+#include <errno.h>
+#endif
 
 /*****************************************************************************
  *	Local Headers
@@ -70,7 +76,6 @@
  *	Local Variables
  ****************************************************************************/
 
-#define SYSCALL(call) while(((call) == -1) && (errno == EINTR))
 #undef read
 #define read(a,b,c) xf86ReadSerial((a),(b),(c))
 
