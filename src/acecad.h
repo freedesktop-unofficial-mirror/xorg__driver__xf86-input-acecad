@@ -109,6 +109,8 @@ static InputInfoPtr AceCadPreInit(InputDriverPtr, IDevPtr , int);
 static void USBReadInput (LocalDevicePtr);
 static Bool USBQueryHardware (LocalDevicePtr);
 static int IsUSBLine(int);
+static Bool fd_query_acecad(int);
+static Bool AceCadAutoDevProbe(LocalDevicePtr);
 #endif
 
 

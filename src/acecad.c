@@ -63,6 +63,7 @@
 
 #ifdef LINUX_INPUT
 #include <errno.h>
+#include <fcntl.h>
 #endif
 
 /*****************************************************************************
@@ -179,6 +180,76 @@ IsUSBLine(int fd)
 	return 0;
     }
 }
+
+/* Heavyly inspired by synpatics/eventcomm.c
+ * TODO use sysfs if possible */
+#define DEV_INPUT_EVENT "/dev/input"
+#define EVENT_DEV_NAME "event"
+#define EV_DEV_NAME_MAXLEN 64
+
+static Bool
+fd_query_acecad(int fd) {
+	char name[256] = "Unknown";
+	char ace_name[7] = "acecad";
+	ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+	name[6] = '\0';
+	if (xf86NameCmp(name, ace_name) == 0)
+		return TRUE;
+	return FALSE;
+}
+
+static Bool
+AceCadAutoDevProbe(LocalDevicePtr local)
+{
+    /* We are trying to find the right eventX device */
+    int i;
+    Bool have_evdev = FALSE;
+    int noent_cnt = 0;
+    const int max_skip = 10;
+
+    xf86Msg(X_INFO, "%s: probing event devices for Acecad tablets\n", local->name);
+    for (i = 0; ; i++) {
+	char fname[64];
+	int fd = -1;
+	Bool is_acecad;
+
+	int np = snprintf(fname, EV_DEV_NAME_MAXLEN, "%s/%s%d", DEV_INPUT_EVENT, EVENT_DEV_NAME, i);
+	if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
+		xf86Msg(X_WARNING, "too many devices, giving up");
+		break;
+	}
+	SYSCALL(fd = open(fname, O_RDONLY));
+	if (fd < 0) {
+	    if (errno == ENOENT) {
+		if (++noent_cnt >= max_skip)
+		    break;
+		else
+		    continue;
+	    } else {
+		continue;
+	    }
+	}
+	noent_cnt = 0;
+	have_evdev = TRUE;
+	is_acecad = fd_query_acecad(fd);
+	SYSCALL(close(fd));
+	if (is_acecad) {
+	    xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
+		    local->name, fname);
+	    xf86ReplaceStrOption(local->options, "Device", fname);
+	    return TRUE;
+	}
+    }
+    xf86Msg(X_ERROR, "%s: no Acecad event device found (checked %d nodes)\n",
+	   local->name, i + 1);
+    if (i <= max_skip)
+	xf86Msg(X_ERROR, "%s: The /dev/input/event* device nodes seem to be missing\n",
+	       local->name);
+    if (i > max_skip && !have_evdev)
+	xf86Msg(X_ERROR, "%s: The evdev kernel module seems to be missing\n", local->name);
+    return FALSE;
+}
+
 #endif
 
 static InputInfoPtr
@@ -216,6 +287,20 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 	xf86OptionListReport(local->options);
 
 	priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
+
+	s = xf86FindOptionValue(local->options, "Device");
+	if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
+#ifdef LINUX_INPUT
+		if (!AceCadAutoDevProbe(local))
+		{
+			xf86Msg(X_ERROR, "%s: unable to find device\n", local->name);
+			goto SetupProc_fail;
+		}
+#else
+		xf86Msg(X_NOT_IMPLEMENTED, "%s: device autodetection not implemented, sorry\n", local->name);
+		goto SetupProc_fail;
+#endif
+	}
 
 	local->fd = xf86OpenSerial (local->options);
 	if (local->fd == -1)
@@ -373,6 +458,7 @@ DeviceOn (DeviceIntPtr dev)
 	if (local->fd == -1)
 	{
 		xf86Msg(X_WARNING, "%s: cannot open input device\n", local->name);
+		/* TODO rescan if auto-dev */
 		return (!Success);
 	}
 
