@@ -85,6 +85,9 @@ AC_SUBST([CFLAGS])
 
 # Checks for header files.
 AC_HEADER_STDC
+AC_HEADER_CHECK([linux/input.h],
+		[AC_DEFINE([LINUX_INPUT], [1], [Using the Linux input subsystem])]
+		)
 
 XORG_MANPAGE_SECTIONS
 XORG_RELEASE_VERSION
