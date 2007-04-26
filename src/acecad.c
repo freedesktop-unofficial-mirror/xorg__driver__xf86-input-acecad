@@ -25,13 +25,7 @@
  */
 /* $XFree86: xc/programs/Xserver/hw/xfree86/input/acecad/acecad.c,v 1.4 2003/10/30 00:40:45 dawes Exp $ */
 
-#ifdef HAVE_CONFIG_H
 #include "config.h"
-#else
-#define PACKAGE_VERSION_MAJOR 1
-#define PACKAGE_VERSION_MINOR 1
-#define PACKAGE_VERSION_PATCHLEVEL 1
-#endif
 
 #define _ACECAD_C_
 /*****************************************************************************
