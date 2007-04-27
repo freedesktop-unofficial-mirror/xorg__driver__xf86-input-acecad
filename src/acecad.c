@@ -188,15 +188,19 @@ IsUSBLine(int fd)
 #define EV_DEV_NAME_MAXLEN 64
 
 static Bool
-fd_query_acecad(int fd) {
+fd_query_acecad(int fd, char *ace_name) {
 	char name[256] = "Unknown";
-	char ace_name[7] = "acecad";
+	int cmp_at = strlen(ace_name);
+	if (cmp_at > 256)
+		cmp_at = 256;
 	ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-	name[6] = '\0';
+	name[cmp_at] = '\0';
 	if (xf86NameCmp(name, ace_name) == 0)
 		return TRUE;
 	return FALSE;
 }
+
+static char ace_name_default[7] = "acecad";
 
 static Bool
 AceCadAutoDevProbe(LocalDevicePtr local)
@@ -207,6 +211,9 @@ AceCadAutoDevProbe(LocalDevicePtr local)
     int noent_cnt = 0;
     const int max_skip = 10;
 
+    char *ace_name = xf86FindOptionValue(local->options, "Name");
+    if (!ace_name)
+        ace_name = ace_name_default;
     xf86Msg(X_INFO, "%s: probing event devices for Acecad tablets\n", local->name);
     for (i = 0; ; i++) {
 	char fname[64];
@@ -231,7 +238,7 @@ AceCadAutoDevProbe(LocalDevicePtr local)
 	}
 	noent_cnt = 0;
 	have_evdev = TRUE;
-	is_acecad = fd_query_acecad(fd);
+	is_acecad = fd_query_acecad(fd, ace_name);
 	SYSCALL(close(fd));
 	if (is_acecad) {
 	    xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
@@ -240,8 +247,8 @@ AceCadAutoDevProbe(LocalDevicePtr local)
 	    return TRUE;
 	}
     }
-    xf86Msg(X_ERROR, "%s: no Acecad event device found (checked %d nodes)\n",
-	   local->name, i + 1);
+    xf86Msg(X_ERROR, "%s: no Acecad event device found (checked %d nodes, no device name started with '%s')\n",
+	   local->name, i + 1, ace_name);
     if (i <= max_skip)
 	xf86Msg(X_ERROR, "%s: The /dev/input/event* device nodes seem to be missing\n",
 	       local->name);
