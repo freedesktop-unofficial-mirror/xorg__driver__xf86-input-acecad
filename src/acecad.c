@@ -695,8 +695,8 @@ DeviceInit (DeviceIntPtr dev)
     if (priv->acecadInc < 1)
     {
         /* guess the best increment value given video mode */
-        rx=priv->acecadMaxX / screenInfo.screens[0]->width;
-        ry=priv->acecadMaxY / screenInfo.screens[0]->height;
+        rx = priv->acecadMaxX / screenInfo.screens[0]->width;
+        ry = priv->acecadMaxY / screenInfo.screens[0]->height;
         if (rx < ry)
             priv->acecadInc = rx;
         else
@@ -837,8 +837,8 @@ USBReadInput (LocalDevicePtr local)
         return;
     }
 
-    for (event=(struct input_event *)eventbuf;
-            event<(struct input_event *)(eventbuf+len); event++) {
+    for (event = (struct input_event *)eventbuf;
+            event < (struct input_event *)(eventbuf+len); event++) {
 
         switch (event->type) {
             case EV_SYN: /* 2.6.x */
@@ -872,15 +872,15 @@ USBReadInput (LocalDevicePtr local)
                         break;
 
                     case BTN_TOUCH:
-                        buttons=set_bit(buttons,0,event->value);
+                        buttons = set_bit(buttons,0,event->value);
                         break;
 
                     case BTN_STYLUS:
-                        buttons=set_bit(buttons,1,event->value);
+                        buttons = set_bit(buttons,1,event->value);
                         break;
 
                     case BTN_STYLUS2:
-                        buttons=set_bit(buttons,2,event->value);
+                        buttons = set_bit(buttons,2,event->value);
                         break;
                 }
                 break; /* EV_KEY */
@@ -995,7 +995,7 @@ QueryHardware (AceCadPrivatePtr priv)
     WriteString(ACECAD_PROMPT_MODE);
 
     /* Flush */
-    while (XisbRead(priv->buffer) >=0);
+    while (XisbRead(priv->buffer) >= 0);
 
     /* Ask for Config packet*/
     WriteString(ACECAD_CONFIG);
@@ -1014,10 +1014,10 @@ QueryHardware (AceCadPrivatePtr priv)
         xf86Msg(X_PROBED, "ACECAD Tablet MaxX:%d MaxY:%d\n", priv->acecadMaxX, priv->acecadMaxY);
     }
     else
-        return (!Success);
+        return !Success;
 
     /*xf86Msg(X_INFO, "ACECAD Tablet query hardware fini \n");*/
-    return (Success);
+    return Success;
 }
 
 #define BITS_PER_LONG (sizeof(long) * 8)
@@ -1067,7 +1067,7 @@ USBQueryHardware (LocalDevicePtr local)
         }
 
     xf86Msg(X_PROBED, "ACECAD Tablet MaxX:%d MaxY:%d MaxZ:%d\n", priv->acecadMaxX, priv->acecadMaxY, priv->acecadMaxZ);
-    return (Success);
+    return Success;
 }
 #endif
 
@@ -1083,7 +1083,7 @@ AceCadGetPacket (AceCadPrivatePtr priv)
     int count = 0;
     int c = 0;
 
-    while((c = XisbRead(priv->buffer))>=0 )
+    while((c = XisbRead(priv->buffer)) >= 0 )
     {
 
         /*
@@ -1093,7 +1093,7 @@ AceCadGetPacket (AceCadPrivatePtr priv)
         if (count++ > 500)
         {
             NewPacket (priv);
-            return (!Success);
+            return !Success;
         }
 
         if (c & PHASING_BIT)
@@ -1104,15 +1104,15 @@ AceCadGetPacket (AceCadPrivatePtr priv)
             XisbBlockDuration (priv->buffer, 10000);
             priv->packet[priv->packeti++] = c;
             count = ACECAD_PACKET_SIZE - 1;
-            while (count-- && (c = XisbRead(priv->buffer)) >=0)
+            while (count-- && (c = XisbRead(priv->buffer)) >= 0)
             {
                 /*xf86Msg(X_INFO, "Push %2.2x\n",(char) c);*/
                 priv->packet[priv->packeti++] = c;
             }
             XisbBlockDuration (priv->buffer, 0);
             if(c > 0)
-                return (Success);
+                return Success;
         }
     }
-    return (!Success);
+    return !Success;
 }
