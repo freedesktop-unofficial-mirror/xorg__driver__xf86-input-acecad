@@ -44,12 +44,12 @@
 #define ACECAD_PROMPT_MODE	"B"		/* Prompt mode */
 #define ACECAD_STREAM_MODE	"@"		/* Stream mode */
 #define ACECAD_INCREMENT	'I'		/* Set increment */
-#define ACECAD_BINARY_FMT	"zb"	/* Binary reporting */
+#define ACECAD_BINARY_FMT	"zb"		/* Binary reporting */
 
 #define ACECAD_PROMPT		"P"		/* Prompt for current position */
 
 #define PHASING_BIT		0x80
-#define PROXIMITY_BIT	0x40
+#define PROXIMITY_BIT		0x40
 #define TABID_BIT		0x20
 #define XSIGN_BIT		0x10
 #define YSIGN_BIT		0x08
@@ -66,7 +66,7 @@ static const char * acecad_initstr = ACECAD_BINARY_FMT ACECAD_STREAM_MODE;
 
 typedef struct 
 {
-	XISBuffer *buffer;
+    XISBuffer	*buffer;
     int		acecadInc;		/* increment between transmits */
     int		acecadOldX;		/* previous X position */
     int		acecadOldY;		/* previous Y position */
@@ -76,8 +76,8 @@ typedef struct
     int		acecadMaxX;		/* max X value */
     int		acecadMaxY;		/* max Y value */
     int		acecadMaxZ;		/* max Y value */
-    char	acecadReportSpeed;		/* report speed */
-    int		acecadUSB;		/*USB flag*/
+    char	acecadReportSpeed;	/* report speed */
+    int		acecadUSB;		/* USB flag*/
     BOOL	acecadAutoDev;		/* are using auto-dev */
     int		flags;			/* various flags */
     int		packeti;		/* number of bytes read */
