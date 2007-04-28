@@ -60,6 +60,8 @@
 #define USB_FLAG		2
 #define AUTODEV_FLAG		4
 
+#define NOTAVAIL ((errno == ENODEV) || (errno == ENXIO) || (errno == ENOENT))
+
 #define milisleep(ms) xf86usleep (ms * 1000)
 
 #define SYSCALL(call) while(((call) == -1) && (errno == EINTR))
