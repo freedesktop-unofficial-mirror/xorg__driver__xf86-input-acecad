@@ -833,6 +833,10 @@ USBReadInput (LocalDevicePtr local)
 
 	if (len <= 0) {
 		xf86Msg(X_ERROR, "%s: error reading device: %s\n", local->name, strerror(errno));
+		if ((errno == ENODEV) && priv->acecadAutoDev && AceCadAutoDevProbe(local)) {
+			DeviceOff(local->dev);
+			DeviceOn(local->dev);
+		}
 		return;
 	}
 
