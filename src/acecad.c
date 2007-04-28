@@ -366,10 +366,12 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 	xf86OptionListReport(local->options);
 
 	priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
+	priv->acecadAutoDev = FALSE;
 
 	s = xf86FindOptionValue(local->options, "Device");
 	if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
 #ifdef LINUX_INPUT
+		priv->acecadAutoDev = TRUE;
 		if (!AceCadAutoDevProbe(local))
 		{
 			xf86Msg(X_ERROR, "%s: unable to find device\n", local->name);
@@ -536,8 +538,12 @@ DeviceOn (DeviceIntPtr dev)
 	local->fd = xf86OpenSerial(local->options);
 	if (local->fd == -1)
 	{
-		xf86Msg(X_WARNING, "%s: cannot open input device\n", local->name);
-		/* TODO rescan if auto-dev */
+		xf86Msg(X_WARNING, "%s: cannot open input device %s\n", local->name, xf86FindOptionValue(local->options, "Device"));
+#ifdef LINUX_INPUT
+		if (priv->acecadAutoDev && AceCadAutoDevProbe(local))
+			local->fd = xf86OpenSerial(local->options);
+		if (local->fd == -1)
+#endif
 		return (!Success);
 	}
 
