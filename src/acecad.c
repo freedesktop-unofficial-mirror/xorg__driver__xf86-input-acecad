@@ -64,6 +64,10 @@
 #ifdef LINUX_INPUT
 #include <errno.h>
 #include <fcntl.h>
+#ifdef LINUX_SYSFS
+#include <sysfs/libsysfs.h>
+#include <dlfcn.h>
+#endif
 #endif
 
 /*****************************************************************************
@@ -181,11 +185,12 @@ IsUSBLine(int fd)
     }
 }
 
-/* Heavyly inspired by synpatics/eventcomm.c
- * TODO use sysfs if possible */
-#define DEV_INPUT_EVENT "/dev/input"
-#define EVENT_DEV_NAME "event"
+/* Heavily inspired by synpatics/eventcomm.c */
+
+#define DEV_INPUT_EVENT "/dev/input/event"
 #define EV_DEV_NAME_MAXLEN 64
+#define SET_EVENT_NUM(str, num) \
+    snprintf(str, EV_DEV_NAME_MAXLEN, "%s%d", DEV_INPUT_EVENT, num)
 
 static Bool
 fd_query_acecad(int fd, char *ace_name) {
@@ -202,27 +207,94 @@ fd_query_acecad(int fd, char *ace_name) {
 
 static char ace_name_default[7] = "acecad";
 
+#ifdef LINUX_SYSFS
+static char usb_bus_name[4] = "usb";
+static char acecad_driver_name[11] = "usb_acecad";
+#endif
+
 static Bool
 AceCadAutoDevProbe(LocalDevicePtr local)
 {
     /* We are trying to find the right eventX device */
-    int i;
+    int i = 0;
     Bool have_evdev = FALSE;
     int noent_cnt = 0;
     const int max_skip = 10;
-
     char *ace_name = xf86FindOptionValue(local->options, "Name");
+    char fname[EV_DEV_NAME_MAXLEN];
+    int np;
+
+#ifdef LINUX_SYSFS
+    struct sysfs_bus *usb_bus = NULL;
+    struct sysfs_driver *acecad_driver = NULL;
+    struct sysfs_device *candidate = NULL;
+    char *link = NULL;
+    struct dlist *devs = NULL;
+    struct dlist *links = NULL;
+    unsigned int major = 0, minor = 0;
+    void *libsysfs = NULL;
+
+    if (libsysfs = dlopen("libsysfs.so", RTLD_NOW | RTLD_GLOBAL)) {
+        xf86Msg(X_INFO, "%s: querying sysfs for Acecad tablets\n", local->name);
+        usb_bus = sysfs_open_bus(usb_bus_name);
+        if (usb_bus) {
+            xf86MsgVerb(X_PROBED, 4, "%s: usb bus opened\n", local->name);
+            acecad_driver = sysfs_get_bus_driver(usb_bus, acecad_driver_name);
+            if (acecad_driver) {
+                xf86MsgVerb(X_PROBED, 4, "%s: usb_acecad driver opened\n", local->name);
+                devs = sysfs_get_driver_devices(acecad_driver);
+                if (devs) {
+                    xf86MsgVerb(X_PROBED, 4, "%s: usb_acecad devices retrieved\n", local->name);
+                    dlist_for_each_data(devs, candidate, struct sysfs_device) {
+                        xf86MsgVerb(X_PROBED, 4, "%s: device %s at %s\n", local->name, candidate->name, candidate->path);
+                        links = sysfs_open_link_list(candidate->path);
+                        dlist_for_each_data(links, link, char) {
+                            if (sscanf(link, "input:event%d", &i) == 1) {
+                                xf86MsgVerb(X_PROBED, 4, "%s: device %s at %s: %s\n", local->name, candidate->name, candidate->path, link);
+                                break;
+                            }
+                        }
+                        sysfs_close_list(links);
+                        if (i > 0) /* We found something */
+                            break;
+                    }
+                } else
+                    xf86MsgVerb(X_WARNING, 4, "%s: no usb_acecad devices found\n", local->name);
+            } else
+                xf86MsgVerb(X_WARNING, 4, "%s: usb_acecad driver not found\n", local->name);
+        } else
+            xf86MsgVerb(X_WARNING, 4, "%s: usb bus not found\n", local->name);
+        sysfs_close_bus(usb_bus);
+        dlclose(libsysfs);
+
+        if (i > 0) {
+            /* We found something */
+            np = SET_EVENT_NUM(fname, i);
+            if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
+                xf86Msg(X_WARNING, "%s: unable to manage event device %d", local->name, i);
+            } else {
+                xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
+                        local->name, fname);
+                xf86ReplaceStrOption(local->options, "Device", fname);
+                return TRUE;
+            }
+        }
+    } else
+        xf86MsgVerb(X_WARNING, 4, "%s: libsysfs not found\n", local->name);
+
+#endif
+
     if (!ace_name)
         ace_name = ace_name_default;
+
     xf86Msg(X_INFO, "%s: probing event devices for Acecad tablets\n", local->name);
     for (i = 0; ; i++) {
-	char fname[64];
 	int fd = -1;
 	Bool is_acecad;
 
-	int np = snprintf(fname, EV_DEV_NAME_MAXLEN, "%s/%s%d", DEV_INPUT_EVENT, EVENT_DEV_NAME, i);
+	np = SET_EVENT_NUM(fname, i);
 	if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
-		xf86Msg(X_WARNING, "too many devices, giving up");
+		xf86Msg(X_WARNING, "%s: too many devices, giving up %d", local->name, i);
 		break;
 	}
 	SYSCALL(fd = open(fname, O_RDONLY));

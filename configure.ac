@@ -88,6 +88,9 @@ AC_HEADER_STDC
 AC_HEADER_CHECK([linux/input.h],
 		[AC_DEFINE([LINUX_INPUT], [1], [Using the Linux input subsystem])]
 		)
+AC_HEADER_CHECK([sysfs/libsysfs.h],
+		[AC_DEFINE([LINUX_SYSFS], [1], [Using sysfs to probe devices])]
+		)
 
 XORG_MANPAGE_SECTIONS
 XORG_RELEASE_VERSION
