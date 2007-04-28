@@ -59,6 +59,7 @@
 #define ABSOLUTE_FLAG		1
 #define USB_FLAG		2
 #define AUTODEV_FLAG		4
+#define AVAIL_FLAG		8
 
 #define NOTAVAIL ((errno == ENODEV) || (errno == ENXIO) || (errno == ENOENT))
 

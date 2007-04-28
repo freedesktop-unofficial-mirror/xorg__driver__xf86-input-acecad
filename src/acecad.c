@@ -539,7 +539,8 @@ DeviceOn (DeviceIntPtr dev)
     local->fd = xf86OpenSerial(local->options);
     if (local->fd == -1)
     {
-        xf86Msg(X_WARNING, "%s: cannot open input device %s\n", local->name, xf86FindOptionValue(local->options, "Device"));
+        xf86Msg(X_WARNING, "%s: cannot open input device %s: %s\n", local->name, xf86FindOptionValue(local->options, "Device"), strerror(errno));
+        priv->flags &= ~AVAIL_FLAG;
 #ifdef LINUX_INPUT
         if ((priv->flags & AUTODEV_FLAG) && AceCadAutoDevProbe(local, 4))
             local->fd = xf86OpenSerial(local->options);
@@ -547,6 +548,7 @@ DeviceOn (DeviceIntPtr dev)
 #endif
             return (!Success);
     }
+    priv->flags |= AVAIL_FLAG;
 
 
     if (!(priv->flags & USB_FLAG)) {
@@ -822,19 +824,34 @@ USBReadInput (LocalDevicePtr local)
     int z = priv->acecadOldZ;
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
-    int is_core_pointer;
-
-    is_core_pointer = xf86IsCorePointer(local->dev);
+    int is_core_pointer = xf86IsCorePointer(local->dev);
+    /* Is autodev active? */
+    int autodev = priv->flags & AUTODEV_FLAG;
+    /* Was the device available last time we checked? */
+    int avail = priv->flags & AVAIL_FLAG;
 
     SYSCALL(len = read(local->fd, eventbuf, sizeof(eventbuf)));
 
     if (len <= 0) {
-        xf86Msg(X_ERROR, "%s: error reading device: %s\n", local->name, strerror(errno));
-        if (NOTAVAIL && (priv->flags & AUTODEV_FLAG) && AceCadAutoDevProbe(local, 4)) {
-            DeviceOff(local->dev);
-            DeviceOn(local->dev);
+        if (avail) {
+            xf86Msg(X_ERROR, "%s: error reading device %s: %s\n", local->name, xf86FindOptionValue(local->options, "Device"), strerror(errno));
+        }
+        if (NOTAVAIL) {
+            priv->flags &= ~AVAIL_FLAG;
+            if(autodev) {
+                if (AceCadAutoDevProbe(local, 4)) {
+                    DeviceOff(local->dev);
+                    DeviceOn(local->dev);
+                }
+            }
         }
         return;
+    } else {
+        if (!avail) {
+            /* If the device wasn't available last time we checked */
+            xf86Msg(X_INFO, "%s: device %s is available again\n", local->name, xf86FindOptionValue(local->options, "Device"));
+            priv->flags |= AVAIL_FLAG;
+        }
     }
 
     for (event = (struct input_event *)eventbuf;
@@ -892,7 +909,7 @@ USBReadInput (LocalDevicePtr local)
          * whereas 2.4.x sends EV_ABS/ABS_MISC. We have to support both.
          */
         if (!(  (event->type == EV_SYN && event->code == SYN_REPORT) ||
-                (event->type == EV_ABS && event->code == ABS_MISC)
+                    (event->type == EV_ABS && event->code == ABS_MISC)
              )) {
             continue;
         }
@@ -940,7 +957,7 @@ USBReadInput (LocalDevicePtr local)
 }
 #endif
 
-static void
+    static void
 CloseProc (LocalDevicePtr local)
 {
 }
@@ -950,7 +967,7 @@ CloseProc (LocalDevicePtr local)
  * This function converts the device's valuator outputs to x and y coordinates
  * to simulate mouse events.
  */
-static Bool
+    static Bool
 ConvertProc (LocalDevicePtr local, int first, int num,
         int v0, int v1, int v2, int v3, int v4, int v5,
         int *x, int *y)
@@ -963,7 +980,7 @@ ConvertProc (LocalDevicePtr local, int first, int num,
 }
 
 
-static Bool
+    static Bool
 ReverseConvertProc (LocalDevicePtr local,
         int x, int  y,
         int *valuators)
@@ -981,7 +998,7 @@ ReverseConvertProc (LocalDevicePtr local,
     XisbWrite (priv->buffer, (unsigned char *)(str), strlen(str))
 
 
-static Bool
+    static Bool
 QueryHardware (AceCadPrivatePtr priv)
 {
 
@@ -1027,7 +1044,7 @@ QueryHardware (AceCadPrivatePtr priv)
 #define LONG(x) ((x)/BITS_PER_LONG)
 
 #ifdef LINUX_INPUT
-static Bool
+    static Bool
 USBQueryHardware (LocalDevicePtr local)
 {
     AceCadPrivatePtr	priv = (AceCadPrivatePtr) local->private;
@@ -1071,13 +1088,13 @@ USBQueryHardware (LocalDevicePtr local)
 }
 #endif
 
-static void
+    static void
 NewPacket (AceCadPrivatePtr priv)
 {
     priv->packeti = 0;
 }
 
-static Bool
+    static Bool
 AceCadGetPacket (AceCadPrivatePtr priv)
 {
     int count = 0;
