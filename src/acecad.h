@@ -25,14 +25,14 @@
  */
 /* $XFree86: xc/programs/Xserver/hw/xfree86/input/acecad/acecad.h,v 1.2tsi Exp $ */
 
-#ifndef	_ACECAD_H_
+#ifndef _ACECAD_H_
 #define _ACECAD_H_
 
 /******************************************************************************
  *		Definitions
  *		structs, typedefs, #defines, enums
  *****************************************************************************/
-#define ACECAD_PACKET_SIZE		7
+#define ACECAD_PACKET_SIZE	7
 
 #define ACECAD_CONFIG		"a"		/* Send configuration (max coords) */
 

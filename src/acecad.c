@@ -176,12 +176,12 @@ IsUSBLine(int fd)
     SYSCALL(err = ioctl(fd, EVIOCGVERSION, &version));
 
     if (!err) {
-	xf86MsgVerb(X_PROBED, 4, "Kernel Input driver version is %d.%d.%d\n",
-	       version >> 16, (version >> 8) & 0xff, version & 0xff);
-	return 1;
+        xf86MsgVerb(X_PROBED, 4, "Kernel Input driver version is %d.%d.%d\n",
+                version >> 16, (version >> 8) & 0xff, version & 0xff);
+        return 1;
     } else {
-	xf86MsgVerb(X_PROBED, 4, "No Kernel Input driver found\n");
-	return 0;
+        xf86MsgVerb(X_PROBED, 4, "No Kernel Input driver found\n");
+        return 0;
     }
 }
 
@@ -194,15 +194,15 @@ IsUSBLine(int fd)
 
 static Bool
 fd_query_acecad(int fd, char *ace_name) {
-	char name[256] = "Unknown";
-	int cmp_at = strlen(ace_name);
-	if (cmp_at > 256)
-		cmp_at = 256;
-	ioctl(fd, EVIOCGNAME(sizeof(name)), name);
-	name[cmp_at] = '\0';
-	if (xf86NameCmp(name, ace_name) == 0)
-		return TRUE;
-	return FALSE;
+    char name[256] = "Unknown";
+    int cmp_at = strlen(ace_name);
+    if (cmp_at > 256)
+        cmp_at = 256;
+    ioctl(fd, EVIOCGNAME(sizeof(name)), name);
+    name[cmp_at] = '\0';
+    if (xf86NameCmp(name, ace_name) == 0)
+        return TRUE;
+    return FALSE;
 }
 
 static char ace_name_default[7] = "acecad";
