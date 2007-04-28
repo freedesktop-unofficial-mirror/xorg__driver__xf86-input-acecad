@@ -58,6 +58,7 @@
 
 #define ABSOLUTE_FLAG		1
 #define USB_FLAG		2
+#define AUTODEV_FLAG		4
 
 #define milisleep(ms) xf86usleep (ms * 1000)
 
@@ -78,7 +79,6 @@ typedef struct
     int		acecadMaxY;		/* max Y value */
     int		acecadMaxZ;		/* max Y value */
     char	acecadReportSpeed;	/* report speed */
-    BOOL	acecadAutoDev;		/* are using auto-dev */
     int		flags;			/* various flags */
     int		packeti;		/* number of bytes read */
     int		PacketSize;		/* number of bytes read */

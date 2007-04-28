@@ -367,12 +367,12 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     xf86OptionListReport(local->options);
 
     priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
-    priv->acecadAutoDev = FALSE;
+    priv->flags &= ~ AUTODEV_FLAG;
 
     s = xf86FindOptionValue(local->options, "Device");
     if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
 #ifdef LINUX_INPUT
-        priv->acecadAutoDev = TRUE;
+        priv->flags |= AUTODEV_FLAG;
         if (!AceCadAutoDevProbe(local, 0))
         {
             xf86Msg(X_ERROR, "%s: unable to find device\n", local->name);
@@ -541,7 +541,7 @@ DeviceOn (DeviceIntPtr dev)
     {
         xf86Msg(X_WARNING, "%s: cannot open input device %s\n", local->name, xf86FindOptionValue(local->options, "Device"));
 #ifdef LINUX_INPUT
-        if (priv->acecadAutoDev && AceCadAutoDevProbe(local, 4))
+        if ((priv->flags & AUTODEV_FLAG) && AceCadAutoDevProbe(local, 4))
             local->fd = xf86OpenSerial(local->options);
         if (local->fd == -1)
 #endif
@@ -830,7 +830,7 @@ USBReadInput (LocalDevicePtr local)
 
     if (len <= 0) {
         xf86Msg(X_ERROR, "%s: error reading device: %s\n", local->name, strerror(errno));
-        if ((errno == ENODEV) && priv->acecadAutoDev && AceCadAutoDevProbe(local, 4)) {
+        if ((errno == ENODEV) && (priv->flags & AUTODEV_FLAG) && AceCadAutoDevProbe(local, 4)) {
             DeviceOff(local->dev);
             DeviceOn(local->dev);
         }
