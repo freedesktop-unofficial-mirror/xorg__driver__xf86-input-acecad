@@ -111,7 +111,7 @@ static void USBReadInput (LocalDevicePtr);
 static Bool USBQueryHardware (LocalDevicePtr);
 static int IsUSBLine(int);
 static Bool fd_query_acecad(int, char*);
-static Bool AceCadAutoDevProbe(LocalDevicePtr);
+static Bool AceCadAutoDevProbe(LocalDevicePtr, int);
 #endif
 
 

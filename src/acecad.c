@@ -213,7 +213,7 @@ static char acecad_driver_name[11] = "usb_acecad";
 #endif
 
 static Bool
-AceCadAutoDevProbe(LocalDevicePtr local)
+AceCadAutoDevProbe(LocalDevicePtr local, int verb)
 {
     /* We are trying to find the right eventX device */
     int i = 0;
@@ -235,7 +235,7 @@ AceCadAutoDevProbe(LocalDevicePtr local)
     void *libsysfs = NULL;
 
     if (libsysfs = dlopen("libsysfs.so", RTLD_NOW | RTLD_GLOBAL)) {
-        xf86Msg(X_INFO, "%s: querying sysfs for Acecad tablets\n", local->name);
+        xf86MsgVerb(X_INFO, verb, "%s: querying sysfs for Acecad tablets\n", local->name);
         usb_bus = sysfs_open_bus(usb_bus_name);
         if (usb_bus) {
             xf86MsgVerb(X_PROBED, 4, "%s: usb bus opened\n", local->name);
@@ -271,14 +271,15 @@ AceCadAutoDevProbe(LocalDevicePtr local)
             /* We found something */
             np = SET_EVENT_NUM(fname, i);
             if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
-                xf86Msg(X_WARNING, "%s: unable to manage event device %d", local->name, i);
+                xf86MsgVerb(X_WARNING, verb, "%s: unable to manage event device %d", local->name, i);
             } else {
                 xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
                         local->name, fname);
                 xf86ReplaceStrOption(local->options, "Device", fname);
                 return TRUE;
             }
-        }
+        } else
+            xf86MsgVerb(X_WARNING, verb, "%s: no Acecad devices found via sysfs", local->name);
     } else
         xf86MsgVerb(X_WARNING, 4, "%s: libsysfs not found\n", local->name);
 
@@ -287,14 +288,14 @@ AceCadAutoDevProbe(LocalDevicePtr local)
     if (!ace_name)
         ace_name = ace_name_default;
 
-    xf86Msg(X_INFO, "%s: probing event devices for Acecad tablets\n", local->name);
+    xf86MsgVerb(X_INFO, verb, "%s: probing event devices for Acecad tablets\n", local->name);
     for (i = 0; ; i++) {
 	int fd = -1;
 	Bool is_acecad;
 
 	np = SET_EVENT_NUM(fname, i);
 	if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
-		xf86Msg(X_WARNING, "%s: too many devices, giving up %d", local->name, i);
+		xf86MsgVerb(X_WARNING, verb, "%s: too many devices, giving up %d", local->name, i);
 		break;
 	}
 	SYSCALL(fd = open(fname, O_RDONLY));
@@ -319,13 +320,13 @@ AceCadAutoDevProbe(LocalDevicePtr local)
 	    return TRUE;
 	}
     }
-    xf86Msg(X_ERROR, "%s: no Acecad event device found (checked %d nodes, no device name started with '%s')\n",
+    xf86MsgVerb(X_WARNING, verb, "%s: no Acecad event device found (checked %d nodes, no device name started with '%s')\n",
 	   local->name, i + 1, ace_name);
     if (i <= max_skip)
-	xf86Msg(X_ERROR, "%s: The /dev/input/event* device nodes seem to be missing\n",
+	xf86MsgVerb(X_WARNING, verb, "%s: The /dev/input/event* device nodes seem to be missing\n",
 	       local->name);
     if (i > max_skip && !have_evdev)
-	xf86Msg(X_ERROR, "%s: The evdev kernel module seems to be missing\n", local->name);
+	xf86MsgVerb(X_WARNING, verb, "%s: The evdev kernel module seems to be missing\n", local->name);
     return FALSE;
 }
 
@@ -372,7 +373,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 	if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
 #ifdef LINUX_INPUT
 		priv->acecadAutoDev = TRUE;
-		if (!AceCadAutoDevProbe(local))
+		if (!AceCadAutoDevProbe(local, 0))
 		{
 			xf86Msg(X_ERROR, "%s: unable to find device\n", local->name);
 			goto SetupProc_fail;
@@ -540,7 +541,7 @@ DeviceOn (DeviceIntPtr dev)
 	{
 		xf86Msg(X_WARNING, "%s: cannot open input device %s\n", local->name, xf86FindOptionValue(local->options, "Device"));
 #ifdef LINUX_INPUT
-		if (priv->acecadAutoDev && AceCadAutoDevProbe(local))
+		if (priv->acecadAutoDev && AceCadAutoDevProbe(local, 4))
 			local->fd = xf86OpenSerial(local->options);
 		if (local->fd == -1)
 #endif
@@ -833,7 +834,7 @@ USBReadInput (LocalDevicePtr local)
 
 	if (len <= 0) {
 		xf86Msg(X_ERROR, "%s: error reading device: %s\n", local->name, strerror(errno));
-		if ((errno == ENODEV) && priv->acecadAutoDev && AceCadAutoDevProbe(local)) {
+		if ((errno == ENODEV) && priv->acecadAutoDev && AceCadAutoDevProbe(local, 4)) {
 			DeviceOff(local->dev);
 			DeviceOn(local->dev);
 		}
