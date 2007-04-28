@@ -271,7 +271,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
             /* We found something */
             np = SET_EVENT_NUM(fname, i);
             if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
-                xf86MsgVerb(X_WARNING, verb, "%s: unable to manage event device %d", local->name, i);
+                xf86MsgVerb(X_WARNING, verb, "%s: unable to manage event device %d\n", local->name, i);
             } else {
                 xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
                         local->name, fname);
@@ -279,7 +279,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
                 return TRUE;
             }
         } else
-            xf86MsgVerb(X_WARNING, verb, "%s: no Acecad devices found via sysfs", local->name);
+            xf86MsgVerb(X_WARNING, verb, "%s: no Acecad devices found via sysfs\n", local->name);
     } else
         xf86MsgVerb(X_WARNING, 4, "%s: libsysfs not found\n", local->name);
 
@@ -295,7 +295,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
 
         np = SET_EVENT_NUM(fname, i);
         if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
-            xf86MsgVerb(X_WARNING, verb, "%s: too many devices, giving up %d", local->name, i);
+            xf86MsgVerb(X_WARNING, verb, "%s: too many devices, giving up %d\n", local->name, i);
             break;
         }
         SYSCALL(fd = open(fname, O_RDONLY));
