@@ -394,7 +394,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
 #ifdef LINUX_INPUT
     if(IsUSBLine(local->fd)){
-        priv->acecadUSB = 1;
+        priv->flags |= USB_FLAG;
 
         local->read_input = USBReadInput;
 
@@ -406,7 +406,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     } else
 #endif
     {
-        priv->acecadUSB = 0;
+        priv->flags &= ~USB_FLAG;
 
         local->read_input = ReadInput;
 
@@ -549,7 +549,7 @@ DeviceOn (DeviceIntPtr dev)
     }
 
 
-    if (priv->acecadUSB == 0){
+    if (!(priv->flags & USB_FLAG)) {
         priv->buffer = XisbNew(local->fd, 200);
         if (!priv->buffer)
         {
