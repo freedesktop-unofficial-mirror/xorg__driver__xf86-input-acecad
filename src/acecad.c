@@ -273,10 +273,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
             if (np < 0 || np >= EV_DEV_NAME_MAXLEN) {
                 xf86MsgVerb(X_WARNING, verb, "%s: unable to manage event device %d\n", local->name, i);
             } else {
-                xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
-                        local->name, fname);
-                xf86ReplaceStrOption(local->options, "Device", fname);
-                return TRUE;
+                goto ProbeFound;
             }
         } else
             xf86MsgVerb(X_WARNING, verb, "%s: no Acecad devices found via sysfs\n", local->name);
@@ -314,10 +311,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
         is_acecad = fd_query_acecad(fd, ace_name);
         SYSCALL(close(fd));
         if (is_acecad) {
-            xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
-                    local->name, fname);
-            xf86ReplaceStrOption(local->options, "Device", fname);
-            return TRUE;
+            goto ProbeFound;
         }
     }
     xf86MsgVerb(X_WARNING, verb, "%s: no Acecad event device found (checked %d nodes, no device name started with '%s')\n",
@@ -328,6 +322,12 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
     if (i > max_skip && !have_evdev)
         xf86MsgVerb(X_WARNING, verb, "%s: The evdev kernel module seems to be missing\n", local->name);
     return FALSE;
+
+ProbeFound:
+    xf86Msg(X_PROBED, "%s auto-dev sets device to %s\n",
+            local->name, fname);
+    xf86ReplaceStrOption(local->options, "Device", fname);
+    return TRUE;
 }
 
 #endif
