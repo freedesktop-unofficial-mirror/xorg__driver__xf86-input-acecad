@@ -367,7 +367,6 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     xf86OptionListReport(local->options);
 
     priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
-    priv->flags &= ~AUTODEV_FLAG;
 
     s = xf86FindOptionValue(local->options, "Device");
     if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
@@ -406,8 +405,6 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     } else
 #endif
     {
-        priv->flags &= ~USB_FLAG;
-
         local->read_input = ReadInput;
 
         msgtype = X_DEFAULT;
@@ -455,13 +452,9 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
     s = xf86FindOptionValue(local->options, "Mode");
     msgtype = s ? X_CONFIG : X_DEFAULT;
-    if (s && (xf86NameCmp(s, "Relative") == 0))
+    if (!(s && (xf86NameCmp(s, "relative") == 0)))
     {
-        priv->flags = priv->flags & ~ABSOLUTE_FLAG;
-    }
-    else
-    {
-        priv->flags = priv->flags | ABSOLUTE_FLAG;
+        priv->flags |= ABSOLUTE_FLAG;
     }
 
     xf86Msg(msgtype, "%s is in %s mode\n", local->name, (priv->flags & ABSOLUTE_FLAG) ? "absolute" : "relative");
