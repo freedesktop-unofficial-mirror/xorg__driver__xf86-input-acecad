@@ -336,7 +336,7 @@ static InputInfoPtr
 AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
     LocalDevicePtr local = xf86AllocateInput(drv, 0);
-    AceCadPrivatePtr priv = xcalloc (1, sizeof (AceCadPrivateRec));
+    AceCadPrivatePtr priv = xcalloc (1, sizeof(AceCadPrivateRec));
     int speed;
     int msgtype;
     char *s;
@@ -344,7 +344,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     if ((!local) || (!priv))
         goto SetupProc_fail;
 
-    memset(priv,0,sizeof (AceCadPrivateRec));
+    memset(priv, 0, sizeof(AceCadPrivateRec));
 
     local->name = dev->identifier;
     local->type_name = "ACECAD Tablet";
@@ -367,7 +367,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     xf86OptionListReport(local->options);
 
     priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
-    priv->flags &= ~ AUTODEV_FLAG;
+    priv->flags &= ~AUTODEV_FLAG;
 
     s = xf86FindOptionValue(local->options, "Device");
     if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
@@ -393,7 +393,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     xf86ErrorFVerb( 6, "tty port opened successfully\n" );
 
 #ifdef LINUX_INPUT
-    if(IsUSBLine(local->fd)){
+    if (IsUSBLine(local->fd)) {
         priv->flags |= USB_FLAG;
 
         local->read_input = USBReadInput;
@@ -485,7 +485,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     }
     RemoveEnabledDevice (local->fd);
     local->fd = -1;
-    return (local);
+    return local;
 
     /*
      * If something went wrong, cleanup and return NULL
@@ -497,7 +497,7 @@ SetupProc_fail:
         XisbFree (priv->buffer);
     if (priv)
         xfree (priv);
-    return (NULL);
+    return NULL;
 }
 
 static Bool
@@ -546,7 +546,7 @@ DeviceOn (DeviceIntPtr dev)
             local->fd = xf86OpenSerial(local->options);
         if (local->fd == -1)
 #endif
-            return (!Success);
+            return !Success;
     }
     priv->flags |= AVAIL_FLAG;
 
@@ -557,7 +557,7 @@ DeviceOn (DeviceIntPtr dev)
         {
             xf86CloseSerial(local->fd);
             local->fd = -1;
-            return (!Success);
+            return !Success;
         }
 
         /* Rets qu'a l'envoyer a la tablette */
@@ -568,7 +568,7 @@ DeviceOn (DeviceIntPtr dev)
     xf86FlushInput(local->fd);
     xf86AddEnabledDevice (local);
     dev->public.on = TRUE;
-    return (Success);
+    return Success;
 }
 
 static Bool
@@ -593,7 +593,7 @@ DeviceOff (DeviceIntPtr dev)
 
     xf86RemoveEnabledDevice (local);
     dev->public.on = FALSE;
-    return (Success);
+    return Success;
 }
 
 static Bool
@@ -603,7 +603,7 @@ DeviceClose (DeviceIntPtr dev)
 
     xf86MsgVerb(X_INFO, 4, "%s Device Close\n", local->name);
 
-    return (Success);
+    return Success;
 }
 
 static void
@@ -709,7 +709,7 @@ DeviceInit (DeviceIntPtr dev)
 
     xf86Msg(X_INFO, "%s Increment: %d\n", local->name, priv->acecadInc);
 
-    return (Success);
+    return Success;
 }
 
 static void
@@ -957,7 +957,7 @@ USBReadInput (LocalDevicePtr local)
 }
 #endif
 
-    static void
+static void
 CloseProc (LocalDevicePtr local)
 {
 }
@@ -967,7 +967,7 @@ CloseProc (LocalDevicePtr local)
  * This function converts the device's valuator outputs to x and y coordinates
  * to simulate mouse events.
  */
-    static Bool
+static Bool
 ConvertProc (LocalDevicePtr local, int first, int num,
         int v0, int v1, int v2, int v3, int v4, int v5,
         int *x, int *y)
@@ -980,7 +980,7 @@ ConvertProc (LocalDevicePtr local, int first, int num,
 }
 
 
-    static Bool
+static Bool
 ReverseConvertProc (LocalDevicePtr local,
         int x, int  y,
         int *valuators)
@@ -998,7 +998,7 @@ ReverseConvertProc (LocalDevicePtr local,
     XisbWrite (priv->buffer, (unsigned char *)(str), strlen(str))
 
 
-    static Bool
+static Bool
 QueryHardware (AceCadPrivatePtr priv)
 {
 
@@ -1044,7 +1044,7 @@ QueryHardware (AceCadPrivatePtr priv)
 #define LONG(x) ((x)/BITS_PER_LONG)
 
 #ifdef LINUX_INPUT
-    static Bool
+static Bool
 USBQueryHardware (LocalDevicePtr local)
 {
     AceCadPrivatePtr	priv = (AceCadPrivatePtr) local->private;
@@ -1088,13 +1088,13 @@ USBQueryHardware (LocalDevicePtr local)
 }
 #endif
 
-    static void
+static void
 NewPacket (AceCadPrivatePtr priv)
 {
     priv->packeti = 0;
 }
 
-    static Bool
+static Bool
 AceCadGetPacket (AceCadPrivatePtr priv)
 {
     int count = 0;
