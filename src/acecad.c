@@ -61,8 +61,8 @@
 #include <string.h>
 #include <stdio.h>
 
-#ifdef LINUX_INPUT
 #include <errno.h>
+#ifdef LINUX_INPUT
 #include <fcntl.h>
 #ifdef LINUX_SYSFS
 #include <sysfs/libsysfs.h>
