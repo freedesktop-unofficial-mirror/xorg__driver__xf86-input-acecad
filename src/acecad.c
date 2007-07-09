@@ -488,8 +488,12 @@ SetupProc_fail:
         xf86CloseSerial (local->fd);
     if ((priv) && (priv->buffer))
         XisbFree (priv->buffer);
-    if (priv)
+    if (priv) {
         xfree (priv);
+	if (local)
+		local->private = NULL;
+    }
+    xf86DeleteInput(local, 0);
     return NULL;
 }
 
