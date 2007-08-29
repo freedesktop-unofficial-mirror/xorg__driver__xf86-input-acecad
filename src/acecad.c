@@ -70,6 +70,12 @@
 #endif
 #endif
 
+/* Previously found in xf86Xinput.h */
+#ifdef DBG
+#undef DBG
+#endif
+#define DBG(lvl, f) {if ((lvl) <= xf86GetVerbosity()) f;}
+
 /*****************************************************************************
  *	Local Headers
  ****************************************************************************/
@@ -349,7 +355,9 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     local->name = dev->identifier;
     local->type_name = "ACECAD Tablet";
     local->flags = XI86_POINTER_CAPABLE | XI86_SEND_DRAG_EVENTS;
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
     local->motion_history_proc = xf86GetMotionEvents;
+#endif
     local->control_proc = NULL;
     local->close_proc = CloseProc;
     local->switch_mode = NULL;
