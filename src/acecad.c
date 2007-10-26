@@ -722,13 +722,15 @@ ReadInput (LocalDevicePtr local)
 {
     int x, y, z;
     int prox, buttons;
-    int is_core_pointer, is_absolute;
+    int is_core_pointer = 1, is_absolute;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
     /*xf86Msg(X_INFO, "ACECAD Tablet Read Input\n");*/
 
     is_absolute = (priv->flags & ABSOLUTE_FLAG);
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
     is_core_pointer = xf86IsCorePointer(local->dev);
+#endif
 
     /*
      * set blocking to -1 on the first call because we know there is data to
@@ -829,7 +831,10 @@ USBReadInput (LocalDevicePtr local)
     int z = priv->acecadOldZ;
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
-    int is_core_pointer = xf86IsCorePointer(local->dev);
+    int is_core_pointer = 1;
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
+    is_core_pointer = xf86IsCorePointer(local->dev);
+#endif
     /* Is autodev active? */
     int autodev = priv->flags & AUTODEV_FLAG;
     /* Was the device available last time we checked? */
