@@ -829,6 +829,7 @@ USBReadInput (LocalDevicePtr local)
     int x = priv->acecadOldX;
     int y = priv->acecadOldY;
     int z = priv->acecadOldZ;
+    int report_x, report_y;
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
     int is_core_pointer = 1;
@@ -926,14 +927,15 @@ USBReadInput (LocalDevicePtr local)
 
         if (prox)
         {
+            ConvertProc(local, 0, 3, x, y, 0, 0, 0, 0, &report_x, &report_y);
             if (!(priv->acecadOldProximity))
                 if (!is_core_pointer)
                 {
-                    xf86PostProximityEvent(local->dev, 1, 0, 3 , x, y, z);
+                    xf86PostProximityEvent(local->dev, 1, 0, 3 , report_x, report_y, z);
                 }
 
 
-            xf86PostMotionEvent(local->dev, 1, 0, 3, x, y, z);
+            xf86PostMotionEvent(local->dev, 1, 0, 3, report_x, report_y, z);
 
             if (priv->acecadOldButtons != buttons)
             {
@@ -943,7 +945,7 @@ USBReadInput (LocalDevicePtr local)
                     int id = ffs(delta);
                     delta &= ~(1 << (id-1));
 
-                    xf86PostButtonEvent(local->dev, 1, id, (buttons&(1<<(id-1))), 0, 3, x, y,z);
+                    xf86PostButtonEvent(local->dev, 1, id, (buttons&(1<<(id-1))), 0, 3, report_x, report_y, z);
                 }
             }
         }
@@ -984,8 +986,12 @@ ConvertProc (LocalDevicePtr local, int first, int num,
 {
     AceCadPrivatePtr priv = (AceCadPrivatePtr)(local->private);
 
+    /* TODO: should have a structure to hold which screen the
+     * pointer is attached to? */
+    // xf86Msg(X_INFO, "%s: coordinate conversion in : %d, %d\n", local->name, v0, v1);
     *x = v0 * screenInfo.screens[0]->width / priv->acecadMaxX;
     *y = v1 * screenInfo.screens[0]->height / priv->acecadMaxY;
+    // xf86Msg(X_INFO, "%s: coordinate conversion out: %d, %d\n", local->name, *x, *y);
     return TRUE;
 }
 
