@@ -27,6 +27,9 @@
 
 #include "config.h"
 
+#include <xorgVersion.h>
+#define XORG_VERSION_BOTCHED XORG_VERSION_NUMERIC(1,4,0,0,0)
+
 #define _ACECAD_C_
 /*****************************************************************************
  *	Standard Headers
@@ -664,14 +667,22 @@ DeviceInit (DeviceIntPtr dev)
         InitValuatorAxisStruct(dev,
                 0,
                 0,			/* min val */
+#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
+                screenInfo.screens[0]->width,
+#else
                 priv->acecadMaxX,	/* max val */
+#endif
                 1000,			/* resolution */
                 0,			/* min_res */
                 1000);			/* max_res */
         InitValuatorAxisStruct(dev,
                 1,
                 0,			/* min val */
+#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
+                screenInfo.screens[0]->height,
+#else
                 priv->acecadMaxY,	/* max val */
+#endif
                 1000,			/* resolution */
                 0,			/* min_res */
                 1000);			/* max_res */
@@ -927,7 +938,12 @@ USBReadInput (LocalDevicePtr local)
 
         if (prox)
         {
+#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
             ConvertProc(local, 0, 3, x, y, 0, 0, 0, 0, &report_x, &report_y);
+#else
+            report_x = x;
+            report_y = y;
+#endif
             if (!(priv->acecadOldProximity))
                 if (!is_core_pointer)
                 {
@@ -954,7 +970,7 @@ USBReadInput (LocalDevicePtr local)
             if (!is_core_pointer)
                 if (priv->acecadOldProximity)
                 {
-                    xf86PostProximityEvent(local->dev, 0, 0, 3, x,y,z);
+                    xf86PostProximityEvent(local->dev, 0, 0, 3, report_x, report_y, z);
                 }
             priv->acecadOldProximity = 0;
         }
@@ -1003,8 +1019,10 @@ ReverseConvertProc (LocalDevicePtr local,
 {
     AceCadPrivatePtr priv = (AceCadPrivatePtr)(local->private);
 
+    // xf86Msg(X_INFO, "%s: reverse coordinate conversion in : %d, %d\n", local->name, x, y);
     valuators[0] = x * priv->acecadMaxX / screenInfo.screens[0]->width;
     valuators[1] = y * priv->acecadMaxY / screenInfo.screens[0]->height;
+    // xf86Msg(X_INFO, "%s: reverse coordinate conversion out: %d, %d\n", local->name, valuators[0], valuators[1]);
 
     return TRUE;
 }
