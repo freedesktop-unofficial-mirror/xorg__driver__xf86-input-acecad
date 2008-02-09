@@ -29,6 +29,11 @@
 
 #include <xorgVersion.h>
 #define XORG_VERSION_BOTCHED XORG_VERSION_NUMERIC(1,4,0,0,0)
+#if XORG_VERSION_CURRENT >= XORG_VERSION_BOTCHED
+#define XORG_BOTCHED_INPUT 1
+#else
+#define XORG_BOTCHED_INPUT 0
+#endif
 
 #define _ACECAD_C_
 /*****************************************************************************
@@ -667,7 +672,7 @@ DeviceInit (DeviceIntPtr dev)
         InitValuatorAxisStruct(dev,
                 0,
                 0,			/* min val */
-#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
+#if XORG_BOTCHED_INPUT
                 screenInfo.screens[0]->width,
 #else
                 priv->acecadMaxX,	/* max val */
@@ -678,7 +683,7 @@ DeviceInit (DeviceIntPtr dev)
         InitValuatorAxisStruct(dev,
                 1,
                 0,			/* min val */
-#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
+#if XORG_BOTCHED_INPUT
                 screenInfo.screens[0]->height,
 #else
                 priv->acecadMaxY,	/* max val */
@@ -938,7 +943,7 @@ USBReadInput (LocalDevicePtr local)
 
         if (prox)
         {
-#if XORG_VERSION_CURRENT == XORG_VERSION_BOTCHED
+#if XORG_BOTCHED_INPUT
             ConvertProc(local, 0, 3, x, y, 0, 0, 0, 0, &report_x, &report_y);
 #else
             report_x = x;
