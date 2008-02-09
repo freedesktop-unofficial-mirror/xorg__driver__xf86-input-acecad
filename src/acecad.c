@@ -738,7 +738,7 @@ ReadInput (LocalDevicePtr local)
 {
     int x, y, z;
     int prox, buttons;
-    int is_core_pointer = 1, is_absolute;
+    int is_core_pointer = 0, is_absolute;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
     /*xf86Msg(X_INFO, "ACECAD Tablet Read Input\n");*/
@@ -848,7 +848,7 @@ USBReadInput (LocalDevicePtr local)
     int report_x, report_y;
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
-    int is_core_pointer = 1;
+    int is_core_pointer = 0;
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
     is_core_pointer = xf86IsCorePointer(local->dev);
 #endif
