@@ -245,10 +245,9 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
     char *link = NULL;
     struct dlist *devs = NULL;
     struct dlist *links = NULL;
-    unsigned int major = 0, minor = 0;
     void *libsysfs = NULL;
 
-    if (libsysfs = dlopen("libsysfs.so", RTLD_NOW | RTLD_GLOBAL)) {
+    if ((libsysfs = dlopen("libsysfs.so", RTLD_NOW | RTLD_GLOBAL))) {
         xf86MsgVerb(X_INFO, verb, "%s: querying sysfs for Acecad tablets\n", local->name);
         usb_bus = sysfs_open_bus(usb_bus_name);
         if (usb_bus) {
