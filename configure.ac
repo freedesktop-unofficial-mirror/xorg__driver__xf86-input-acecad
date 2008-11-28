@@ -89,8 +89,9 @@ AC_HEADER_CHECK([linux/input.h],
 		[AC_DEFINE([LINUX_INPUT], [1], [Using the Linux input subsystem])]
 		)
 AC_CHECK_HEADER(sysfs/libsysfs.h, HAVE_LIBSYSFS=yes, HAVE_LIBSYSFS=no)
-AC_DEFINE(LINUX_SYSFS, test x$HAVE_LIBSYSFS = xyes,
-	  [Using sysfs to probe devices])
+if test x$HAVE_LIBSYSFS = xyes; then
+    AC_DEFINE(LINUX_SYSFS, 1, [Using sysfs to probe devices])
+fi
 AM_CONDITIONAL(HAVE_LIBSYSFS, test x$HAVE_LIBSYSFS = xyes)
 
 XORG_MANPAGE_SECTIONS
