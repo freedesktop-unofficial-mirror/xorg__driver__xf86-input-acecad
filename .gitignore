@@ -27,3 +27,7 @@ libtool
 ltmain.sh
 missing
 stamp-h1
+*.4
+xf86-input-acecad-*.tar.*
+ChangeLog
+tags
