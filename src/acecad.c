@@ -100,9 +100,6 @@
  *	Local Variables
  ****************************************************************************/
 
-#undef read
-#define read(a,b,c) xf86ReadSerial((a),(b),(c))
-
 /* max number of input events to read in one read call */
 #define MAX_EVENTS 50
 
@@ -878,7 +875,7 @@ USBReadInput (LocalDevicePtr local)
     /* Was the device available last time we checked? */
     int avail = priv->flags & AVAIL_FLAG;
 
-    SYSCALL(len = read(local->fd, eventbuf, sizeof(eventbuf)));
+    SYSCALL(len = xf86ReadSerial(local->fd, eventbuf, sizeof(eventbuf)));
 
     if (len <= 0) {
         if (avail) {
