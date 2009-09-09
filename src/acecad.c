@@ -23,7 +23,6 @@
  *
  *
  */
-/* $XFree86: xc/programs/Xserver/hw/xfree86/input/acecad/acecad.c,v 1.4 2003/10/30 00:40:45 dawes Exp $ */
 
 #include "config.h"
 
