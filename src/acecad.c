@@ -117,7 +117,6 @@ _X_EXPORT InputDriverRec ACECAD =
 	0
 };
 
-#ifdef XFree86LOADER
 static XF86ModuleVersionInfo VersionRec =
 {
 	"acecad",
@@ -169,7 +168,6 @@ TearDownProc( pointer p )
 	xfree (local);
 #endif
 }
-#endif
 
 static const char *default_options[] =
 {
