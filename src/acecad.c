@@ -155,18 +155,6 @@ SetupProc(	pointer module,
 static void
 TearDownProc( pointer p )
 {
-#if 0
-	LocalDevicePtr local = (LocalDevicePtr) p;
-	AceCadPrivatePtr priv = (AceCadPrivatePtr) local->private;
-
-	DeviceOff (local->dev);
-
-	xf86CloseSerial (local->fd);
-	XisbFree (priv->buffer);
-	xfree (priv);
-	xfree (local->name);
-	xfree (local);
-#endif
 }
 
 static const char *default_options[] =
