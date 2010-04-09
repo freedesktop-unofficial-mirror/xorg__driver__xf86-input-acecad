@@ -26,6 +26,7 @@
 
 #include "config.h"
 
+#include <xorg-server.h>
 #include <xorgVersion.h>
 #define XORG_VERSION_BOTCHED XORG_VERSION_NUMERIC(1,4,0,0,0)
 #if XORG_VERSION_CURRENT >= XORG_VERSION_BOTCHED
