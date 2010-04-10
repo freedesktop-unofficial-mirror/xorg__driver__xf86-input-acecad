@@ -41,7 +41,7 @@
  *	Standard Headers
  ****************************************************************************/
 
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
 #include <asm/types.h>
 #include <linux/input.h>
 #ifndef EV_SYN
@@ -71,9 +71,9 @@
 #include <stdio.h>
 
 #include <errno.h>
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
 #include <fcntl.h>
-#ifdef LINUX_SYSFS
+#ifdef HAVE_SYSFS_LIBSYSFS_H
 #include <sysfs/libsysfs.h>
 #include <dlfcn.h>
 #endif
@@ -169,7 +169,7 @@ static const char *default_options[] =
 	NULL
 };
 
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
 static int
 IsUSBLine(int fd)
 {
@@ -210,7 +210,7 @@ fd_query_acecad(int fd, char *ace_name) {
 
 static char ace_name_default[7] = "acecad";
 
-#ifdef LINUX_SYSFS
+#ifdef HAVE_SYSFS_LIBSYSFS_H
 static char usb_bus_name[4] = "usb";
 static char acecad_driver_name[11] = "usb_acecad";
 #endif
@@ -227,7 +227,7 @@ AceCadAutoDevProbe(LocalDevicePtr local, int verb)
     char fname[EV_DEV_NAME_MAXLEN];
     int np;
 
-#ifdef LINUX_SYSFS
+#ifdef HAVE_SYSFS_LIBSYSFS_H
     struct sysfs_bus *usb_bus = NULL;
     struct sysfs_driver *acecad_driver = NULL;
     struct sysfs_device *candidate = NULL;
@@ -369,7 +369,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
     s = xf86FindOptionValue(local->options, "Device");
     if (!s || (s && (xf86NameCmp(s, "auto-dev") == 0))) {
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
         priv->flags |= AUTODEV_FLAG;
         if (!AceCadAutoDevProbe(local, 0))
         {
@@ -390,7 +390,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     }
     xf86ErrorFVerb( 6, "tty port opened successfully\n" );
 
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
     if (IsUSBLine(local->fd)) {
         priv->flags |= USB_FLAG;
 
@@ -537,7 +537,7 @@ DeviceOn (DeviceIntPtr dev)
     {
         xf86Msg(X_WARNING, "%s: cannot open input device %s: %s\n", local->name, xf86FindOptionValue(local->options, "Device"), strerror(errno));
         priv->flags &= ~AVAIL_FLAG;
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
         if ((priv->flags & AUTODEV_FLAG) && AceCadAutoDevProbe(local, 4))
             local->fd = xf86OpenSerial(local->options);
         if (local->fd == -1)
@@ -854,7 +854,7 @@ ReadInput (LocalDevicePtr local)
     /*xf86Msg(X_INFO, "ACECAD Tablet Sortie Read Input\n");*/
 }
 
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
 #define set_bit(byte,nb,bit)	(bit ? byte | (1<<nb) : byte & (~(1<<nb)))
 static void
 USBReadInput (LocalDevicePtr local)
@@ -1103,7 +1103,7 @@ QueryHardware (AceCadPrivatePtr priv)
 #define OFF(x)  ((x)%BITS_PER_LONG)
 #define LONG(x) ((x)/BITS_PER_LONG)
 
-#ifdef LINUX_INPUT
+#ifdef HAVE_LINUX_INPUT_H
 static Bool
 USBQueryHardware (LocalDevicePtr local)
 {

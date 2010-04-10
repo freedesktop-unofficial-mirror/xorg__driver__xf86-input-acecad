@@ -29,11 +29,6 @@ AM_CFLAGS = $(XORG_CFLAGS) $(CWARNFLAGS)
 
 @DRIVER_NAME@_drv_la_LTLIBRARIES = @DRIVER_NAME@_drv.la
 @DRIVER_NAME@_drv_la_LDFLAGS = -module -avoid-version
-
-if HAVE_LIBSYSFS
-@DRIVER_NAME@_drv_la_LIBADD = -lsysfs
-endif
-
 @DRIVER_NAME@_drv_ladir = @inputdir@
 
 @DRIVER_NAME@_drv_la_SOURCES = @DRIVER_NAME@.c @DRIVER_NAME@.h

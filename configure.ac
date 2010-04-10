@@ -61,17 +61,10 @@ XORG_DRIVER_CHECK_EXT(XINPUT, inputproto)
 PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto $REQUIRED_MODULES)
 
 # Checks for libraries.
+AC_CHECK_LIB([sysfs], [sysfs_close_bus])
 
 # Checks for header files.
-AC_HEADER_STDC
-AC_HEADER_CHECK([linux/input.h],
-		[AC_DEFINE([LINUX_INPUT], [1], [Using the Linux input subsystem])]
-		)
-AC_CHECK_HEADER(sysfs/libsysfs.h, HAVE_LIBSYSFS=yes, HAVE_LIBSYSFS=no)
-if test x$HAVE_LIBSYSFS = xyes; then
-    AC_DEFINE(LINUX_SYSFS, 1, [Using sysfs to probe devices])
-fi
-AM_CONDITIONAL(HAVE_LIBSYSFS, test x$HAVE_LIBSYSFS = xyes)
+AC_CHECK_HEADERS([linux/input.h sysfs/libsysfs.h])
 
 DRIVER_NAME=acecad
 AC_SUBST([DRIVER_NAME])
