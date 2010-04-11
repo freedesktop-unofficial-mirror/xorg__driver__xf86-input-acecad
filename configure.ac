@@ -20,11 +20,11 @@
 #
 # Process this file with autoconf to produce a configure script
 
-AC_PREREQ(2.57)
+AC_PREREQ([2.60])
 AC_INIT([xf86-input-acecad],
-        1.4.0,
+        [1.4.0],
         [https://bugs.freedesktop.org/enter_bug.cgi?product=xorg],
-        xf86-input-acecad)
+        [xf86-input-acecad])
 
 AC_CONFIG_SRCDIR([Makefile.am])
 AC_CONFIG_AUX_DIR(.)
