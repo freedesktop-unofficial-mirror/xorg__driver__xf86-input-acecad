@@ -46,7 +46,6 @@ XORG_MACROS_VERSION(1.4)
 XORG_DEFAULT_OPTIONS
 
 # Checks for programs.
-AC_PROG_CC
 AC_PROG_INSTALL
 
 # Checks for libraries.
