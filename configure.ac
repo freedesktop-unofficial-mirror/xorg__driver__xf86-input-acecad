@@ -54,11 +54,8 @@ AC_CHECK_LIB([sysfs], [sysfs_close_bus])
 # Checks for header files.
 AC_CHECK_HEADERS([linux/input.h sysfs/libsysfs.h])
 
-# Store the list of server defined extensions in REQUIRED_MODULES
-XORG_DRIVER_CHECK_EXT(XINPUT, inputproto)
-
 # Obtain compiler/linker options from server and required extensions
-PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto $REQUIRED_MODULES)
+PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto inputproto)
 
 # Define a configure option for an alternate input module directory
 AC_ARG_WITH(xorg-module-dir,
