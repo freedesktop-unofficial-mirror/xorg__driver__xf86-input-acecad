@@ -55,7 +55,6 @@ AC_CHECK_LIB([sysfs], [sysfs_close_bus])
 AC_CHECK_HEADERS([linux/input.h sysfs/libsysfs.h])
 
 # Store the list of server defined extensions in REQUIRED_MODULES
-XORG_DRIVER_CHECK_EXT(RANDR, randrproto)
 XORG_DRIVER_CHECK_EXT(XINPUT, inputproto)
 
 # Obtain compiler/linker options from server and required extensions
