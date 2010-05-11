@@ -47,6 +47,7 @@ XORG_DEFAULT_OPTIONS
 
 # Checks for programs.
 AC_PROG_INSTALL
+AC_PROG_SED
 
 # Checks for libraries.
 AC_CHECK_LIB([sysfs], [sysfs_close_bus])
