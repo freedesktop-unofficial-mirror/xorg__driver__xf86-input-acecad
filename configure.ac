@@ -45,9 +45,6 @@ m4_ifndef([XORG_MACROS_VERSION],
 XORG_MACROS_VERSION(1.8)
 XORG_DEFAULT_OPTIONS
 
-# Checks for programs.
-AC_PROG_INSTALL
-
 # Checks for libraries.
 AC_CHECK_LIB([sysfs], [sysfs_close_bus])
 
