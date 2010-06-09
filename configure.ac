@@ -52,7 +52,7 @@ AC_CHECK_LIB([sysfs], [sysfs_close_bus])
 AC_CHECK_HEADERS([linux/input.h sysfs/libsysfs.h])
 
 # Obtain compiler/linker options from server and required extensions
-PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto)
+PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto xext kbproto inputproto)
 
 # Define a configure option for an alternate input module directory
 AC_ARG_WITH(xorg-module-dir,
