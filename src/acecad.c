@@ -344,7 +344,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 
     local->name = dev->identifier;
     local->type_name = XI_TABLET;
-    local->flags = XI86_POINTER_CAPABLE | XI86_SEND_DRAG_EVENTS;
+    local->flags = XI86_SEND_DRAG_EVENTS;
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
     local->motion_history_proc = xf86GetMotionEvents;
 #endif
