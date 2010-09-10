@@ -332,7 +332,7 @@ static InputInfoPtr
 AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
     InputInfoPtr local = xf86AllocateInput(drv, 0);
-    AceCadPrivatePtr priv = xcalloc (1, sizeof(AceCadPrivateRec));
+    AceCadPrivatePtr priv = calloc (1, sizeof(AceCadPrivateRec));
     int speed;
     int msgtype;
     char *s;
@@ -487,7 +487,7 @@ SetupProc_fail:
     if ((priv) && (priv->buffer))
         XisbFree (priv->buffer);
     if (priv) {
-        xfree (priv);
+        free (priv);
 	if (local)
 		local->private = NULL;
     }
