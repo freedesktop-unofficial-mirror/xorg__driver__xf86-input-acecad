@@ -615,6 +615,7 @@ DeviceInit (DeviceIntPtr dev)
     InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
     unsigned char map[] = {0, 1, 2, 3};
+    int history_size;
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
     Atom btn_labels[3];
     Atom axes_labels[3];
@@ -660,6 +661,7 @@ DeviceInit (DeviceIntPtr dev)
         return !Success;
     }
 
+    history_size = xf86SetIntOption(local->options , "HistorySize", 0);
 
     /* 3 axes */
     if (InitValuatorClassDeviceStruct (dev, 3,
@@ -669,7 +671,7 @@ DeviceInit (DeviceIntPtr dev)
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 3
                 xf86GetMotionEvents,
 #endif
-                local->history_size,
+                history_size,
                 ((priv->flags & ABSOLUTE_FLAG)? Absolute: Relative)|OutOfProximity)
             == FALSE)
     {
