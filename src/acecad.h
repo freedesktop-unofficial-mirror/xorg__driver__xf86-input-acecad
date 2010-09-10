@@ -100,21 +100,20 @@ static Bool DeviceOn (DeviceIntPtr);
 static Bool DeviceOff (DeviceIntPtr);
 static Bool DeviceClose (DeviceIntPtr);
 static Bool DeviceInit (DeviceIntPtr);
-static void ReadInput (LocalDevicePtr);
-static void CloseProc (LocalDevicePtr);
-static Bool ConvertProc (LocalDevicePtr, int, int, int, int, int, int, int, int, int *, int *);
-static Bool ReverseConvertProc(LocalDevicePtr , int , int , int*);
+static void ReadInput (InputInfoPtr);
+static void CloseProc (InputInfoPtr);
+static Bool ConvertProc (InputInfoPtr, int, int, int, int, int, int, int, int, int *, int *);
+static Bool ReverseConvertProc(InputInfoPtr , int , int , int*);
 static Bool QueryHardware (AceCadPrivatePtr);
 static void NewPacket (AceCadPrivatePtr priv);
 static Bool AceCadGetPacket (AceCadPrivatePtr);
 static InputInfoPtr AceCadPreInit(InputDriverPtr, IDevPtr , int);
 #ifdef HAVE_LINUX_INPUT_H
-static void USBReadInput (LocalDevicePtr);
-static Bool USBQueryHardware (LocalDevicePtr);
+static void USBReadInput (InputInfoPtr);
+static Bool USBQueryHardware (InputInfoPtr);
 static int IsUSBLine(int);
 static Bool fd_query_acecad(int, char*);
-static Bool AceCadAutoDevProbe(LocalDevicePtr, int);
+static Bool AceCadAutoDevProbe(InputInfoPtr, int);
 #endif
-
 
 #endif

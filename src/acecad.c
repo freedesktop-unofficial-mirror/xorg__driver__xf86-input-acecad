@@ -215,7 +215,7 @@ static char acecad_driver_name[11] = "usb_acecad";
 #endif
 
 static Bool
-AceCadAutoDevProbe(LocalDevicePtr local, int verb)
+AceCadAutoDevProbe(InputInfoPtr local, int verb)
 {
     /* We are trying to find the right eventX device */
     int i = 0;
@@ -331,7 +331,7 @@ ProbeFound:
 static InputInfoPtr
 AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
-    LocalDevicePtr local = xf86AllocateInput(drv, 0);
+    InputInfoPtr local = xf86AllocateInput(drv, 0);
     AceCadPrivatePtr priv = xcalloc (1, sizeof(AceCadPrivateRec));
     int speed;
     int msgtype;
@@ -526,7 +526,7 @@ static Bool
 DeviceOn (DeviceIntPtr dev)
 {
     char buffer[256];
-    LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
+    InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
     xf86MsgVerb(X_INFO, 4, "%s Device On\n", local->name);
@@ -569,7 +569,7 @@ DeviceOn (DeviceIntPtr dev)
 static Bool
 DeviceOff (DeviceIntPtr dev)
 {
-    LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
+    InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
 
     xf86MsgVerb(X_INFO, 4, "%s Device Off\n", local->name);
@@ -594,7 +594,7 @@ DeviceOff (DeviceIntPtr dev)
 static Bool
 DeviceClose (DeviceIntPtr dev)
 {
-    LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
+    InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
 
     xf86MsgVerb(X_INFO, 4, "%s Device Close\n", local->name);
 
@@ -604,7 +604,7 @@ DeviceClose (DeviceIntPtr dev)
 static void
 ControlProc(DeviceIntPtr dev, PtrCtrl *ctrl)
 {
-    LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
+    InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
 
     xf86MsgVerb(X_INFO, 4, "%s Control Proc\n", local->name);
 }
@@ -613,7 +613,7 @@ static Bool
 DeviceInit (DeviceIntPtr dev)
 {
     int rx, ry;
-    LocalDevicePtr local = (LocalDevicePtr) dev->public.devicePrivate;
+    InputInfoPtr local = (InputInfoPtr) dev->public.devicePrivate;
     AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
     unsigned char map[] = {0, 1, 2, 3};
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -754,7 +754,7 @@ DeviceInit (DeviceIntPtr dev)
 }
 
 static void
-ReadInput (LocalDevicePtr local)
+ReadInput (InputInfoPtr local)
 {
     int x, y, z;
     int prox, buttons;
@@ -856,7 +856,7 @@ ReadInput (LocalDevicePtr local)
 #ifdef HAVE_LINUX_INPUT_H
 #define set_bit(byte,nb,bit)	(bit ? byte | (1<<nb) : byte & (~(1<<nb)))
 static void
-USBReadInput (LocalDevicePtr local)
+USBReadInput (InputInfoPtr local)
 {
     int len;
     struct input_event * event;
@@ -1011,7 +1011,7 @@ USBReadInput (LocalDevicePtr local)
 #endif
 
 static void
-CloseProc (LocalDevicePtr local)
+CloseProc (InputInfoPtr local)
 {
 }
 
@@ -1021,7 +1021,7 @@ CloseProc (LocalDevicePtr local)
  * to simulate mouse events.
  */
 static Bool
-ConvertProc (LocalDevicePtr local, int first, int num,
+ConvertProc (InputInfoPtr local, int first, int num,
         int v0, int v1, int v2, int v3, int v4, int v5,
         int *x, int *y)
 {
@@ -1038,7 +1038,7 @@ ConvertProc (LocalDevicePtr local, int first, int num,
 
 
 static Bool
-ReverseConvertProc (LocalDevicePtr local,
+ReverseConvertProc (InputInfoPtr local,
         int x, int  y,
         int *valuators)
 {
@@ -1104,7 +1104,7 @@ QueryHardware (AceCadPrivatePtr priv)
 
 #ifdef HAVE_LINUX_INPUT_H
 static Bool
-USBQueryHardware (LocalDevicePtr local)
+USBQueryHardware (InputInfoPtr local)
 {
     AceCadPrivatePtr	priv = (AceCadPrivatePtr) local->private;
     unsigned long	bit[EV_MAX][NBITS(KEY_MAX)];
