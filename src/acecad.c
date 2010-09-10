@@ -349,7 +349,6 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     local->motion_history_proc = xf86GetMotionEvents;
 #endif
     local->control_proc = NULL;
-    local->close_proc = CloseProc;
     local->switch_mode = NULL;
     local->conversion_proc = ConvertProc;
     local->reverse_conversion_proc = ReverseConvertProc;
@@ -1009,11 +1008,6 @@ USBReadInput (InputInfoPtr local)
     /*xf86Msg(X_INFO, "ACECAD Tablet Sortie Read Input\n");*/
 }
 #endif
-
-static void
-CloseProc (InputInfoPtr local)
-{
-}
 
 /*
  * The ConvertProc function may need to be tailored for your device.

@@ -101,7 +101,6 @@ static Bool DeviceOff (DeviceIntPtr);
 static Bool DeviceClose (DeviceIntPtr);
 static Bool DeviceInit (DeviceIntPtr);
 static void ReadInput (InputInfoPtr);
-static void CloseProc (InputInfoPtr);
 static Bool ConvertProc (InputInfoPtr, int, int, int, int, int, int, int, int, int *, int *);
 static Bool ReverseConvertProc(InputInfoPtr , int , int , int*);
 static Bool QueryHardware (AceCadPrivatePtr);
