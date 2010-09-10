@@ -125,7 +125,10 @@ _X_EXPORT InputDriverRec ACECAD =
 	NULL,
 	AceCadPreInit,
 	NULL,
-	NULL
+	NULL,
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+	default_options
+#endif
 };
 
 static XF86ModuleVersionInfo VersionRec =
@@ -328,19 +331,17 @@ ProbeFound:
 
 #endif
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
+static int NewAceCadPreInit(InputDriverPtr drv, InputInfoPtr dev, int flags);
+
 static InputInfoPtr
 AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
 {
     InputInfoPtr local = xf86AllocateInput(drv, 0);
     AceCadPrivatePtr priv = calloc (1, sizeof(AceCadPrivateRec));
-    int speed;
-    int msgtype;
-    char *s;
 
-    if ((!local) || (!priv))
+    if ((!local))
         goto SetupProc_fail;
-
-    memset(priv, 0, sizeof(AceCadPrivateRec));
 
     local->name = dev->identifier;
     local->type_name = XI_TABLET;
@@ -356,12 +357,37 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     local->private = priv;
     local->private_flags = 0;
     local->conf_idev = dev;
-    local->device_control = DeviceControl;
     /*local->always_core_feedback = 0;*/
 
     xf86CollectInputOptions(local, default_options, NULL);
 
     xf86OptionListReport(local->options);
+
+    if (NewAceCadPreInit(drv, local, flags) == Success)
+        return local;
+
+SetupProc_fail:
+    return NULL;
+}
+
+static int
+NewAceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
+#else
+static int
+AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
+#endif
+{
+    AceCadPrivatePtr priv = calloc (1, sizeof(AceCadPrivateRec));
+    int speed;
+    int msgtype;
+    char *s;
+
+    if (!priv)
+        return BadAlloc;
+
+    memset(priv, 0, sizeof(AceCadPrivateRec));
+
+    local->device_control = DeviceControl;
 
     priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
 
@@ -457,11 +483,11 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     xf86Msg(msgtype, "%s is in %s mode\n", local->name, (priv->flags & ABSOLUTE_FLAG) ? "absolute" : "relative");
     DBG (9, XisbTrace (priv->buffer, 1));
 
-    local->history_size = xf86SetIntOption(local->options , "HistorySize", 0);
-
     xf86ProcessCommonOptions(local, local->options);
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
     local->flags |= XI86_CONFIGURED;
+#endif
 
     if (local->fd != -1)
     {
@@ -475,7 +501,7 @@ AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
     }
     RemoveEnabledDevice (local->fd);
     local->fd = -1;
-    return local;
+    return Success;
 
     /*
      * If something went wrong, cleanup and return NULL
@@ -491,7 +517,7 @@ SetupProc_fail:
 		local->private = NULL;
     }
     xf86DeleteInput(local, 0);
-    return NULL;
+    return BadAlloc;
 }
 
 static Bool
