@@ -113,8 +113,7 @@ _X_EXPORT InputDriverRec ACECAD =
 	NULL,
 	AceCadPreInit,
 	NULL,
-	NULL,
-	0
+	NULL
 };
 
 static XF86ModuleVersionInfo VersionRec =
