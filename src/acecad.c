@@ -720,7 +720,11 @@ DeviceInit (DeviceIntPtr dev)
 #endif
                 1000,			/* resolution */
                 0,			/* min_res */
-                1000);			/* max_res */
+                1000			/* max_res */
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+                , Absolute
+#endif
+                );
         InitValuatorAxisStruct(dev,
                 1,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -734,7 +738,11 @@ DeviceInit (DeviceIntPtr dev)
 #endif
                 1000,			/* resolution */
                 0,			/* min_res */
-                1000);			/* max_res */
+                1000			/* max_res */
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+                , Absolute
+#endif
+                );
         InitValuatorAxisStruct(dev,
                 2,
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
@@ -744,7 +752,11 @@ DeviceInit (DeviceIntPtr dev)
                 priv->acecadMaxZ,	/* max val */
                 1000,			/* resolution */
                 0,			/* min_res */
-                1000);		/* max_res */
+                1000		/* max_res */
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 12
+                , Absolute
+#endif
+                );
 
     }
 
