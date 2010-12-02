@@ -55,7 +55,7 @@ AC_CHECK_HEADERS([linux/input.h sysfs/libsysfs.h])
 XORG_DRIVER_CHECK_EXT(RANDR, randrproto)
 
 # Obtain compiler/linker options from server and required extensions
-PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto xext kbproto inputproto $REQUIRED_MODULES)
+PKG_CHECK_MODULES(XORG, [xorg-server >= 1.0.99.901] xproto kbproto inputproto $REQUIRED_MODULES)
 
 # Define a configure option for an alternate input module directory
 AC_ARG_WITH(xorg-module-dir,
