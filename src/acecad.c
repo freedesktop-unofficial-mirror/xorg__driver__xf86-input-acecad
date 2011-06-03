@@ -90,6 +90,10 @@
 #endif
 #define DBG(lvl, f) {if ((lvl) <= xf86GetVerbosity()) f;}
 
+#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
+#error "XINPUT ABI 12 required."
+#endif
+
 /*****************************************************************************
  *	Local Headers
  ****************************************************************************/
@@ -331,66 +335,8 @@ ProbeFound:
 
 #endif
 
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
-static int NewAceCadPreInit(InputDriverPtr drv, InputInfoPtr dev, int flags);
-
-static InputInfoPtr
-AceCadPreInit(InputDriverPtr drv, IDevPtr dev, int flags)
-{
-    InputInfoPtr local = xf86AllocateInput(drv, 0);
-    AceCadPrivatePtr priv = calloc (1, sizeof(AceCadPrivateRec));
-
-    if ((!local))
-        goto SetupProc_fail;
-
-    local->name = dev->identifier;
-    local->type_name = XI_TABLET;
-    local->flags = XI86_SEND_DRAG_EVENTS;
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
-    local->motion_history_proc = xf86GetMotionEvents;
-#endif
-    local->control_proc = NULL;
-    local->switch_mode = NULL;
-    local->conversion_proc = ConvertProc;
-    local->reverse_conversion_proc = ReverseConvertProc;
-    local->dev = NULL;
-    local->private = priv;
-    local->private_flags = 0;
-    local->conf_idev = dev;
-    /*local->always_core_feedback = 0;*/
-
-    xf86CollectInputOptions(local, default_options, NULL);
-
-    xf86OptionListReport(local->options);
-
-    if (NewAceCadPreInit(drv, local, flags) == Success)
-        return local;
-
-SetupProc_fail:
-    return NULL;
-}
-
-static Bool
-ReverseConvertProc (InputInfoPtr local,
-        int x, int  y,
-        int *valuators)
-{
-    AceCadPrivatePtr priv = (AceCadPrivatePtr)(local->private);
-
-    // xf86Msg(X_INFO, "%s: reverse coordinate conversion in : %d, %d\n", local->name, x, y);
-    valuators[0] = x * priv->acecadMaxX / screenInfo.screens[0]->width;
-    valuators[1] = y * priv->acecadMaxY / screenInfo.screens[0]->height;
-    // xf86Msg(X_INFO, "%s: reverse coordinate conversion out: %d, %d\n", local->name, valuators[0], valuators[1]);
-
-    return TRUE;
-}
-
-static int
-NewAceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
-#else
 static int
 AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
-#endif
 {
     AceCadPrivatePtr priv = calloc (1, sizeof(AceCadPrivateRec));
     int speed;
@@ -499,10 +445,6 @@ AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
     DBG (9, XisbTrace (priv->buffer, 1));
 
     xf86ProcessCommonOptions(local, local->options);
-
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
-    local->flags |= XI86_CONFIGURED;
-#endif
 
     if (local->fd != -1)
     {
@@ -709,9 +651,6 @@ DeviceInit (DeviceIntPtr dev)
 #if GET_ABI_MAJOR(ABI_XINPUT_VERSION) >= 7
                 axes_labels,
 #endif
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 3
-                xf86GetMotionEvents,
-#endif
                 history_size,
                 ((priv->flags & ABSOLUTE_FLAG)? Absolute: Relative)|OutOfProximity)
             == FALSE)
@@ -818,9 +757,6 @@ ReadInput (InputInfoPtr local)
     /*xf86Msg(X_INFO, "ACECAD Tablet Read Input\n");*/
 
     is_absolute = (priv->flags & ABSOLUTE_FLAG);
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
-    is_core_pointer = xf86IsCorePointer(local->dev);
-#endif
 
     /*
      * set blocking to -1 on the first call because we know there is data to
@@ -923,9 +859,6 @@ USBReadInput (InputInfoPtr local)
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
     int is_core_pointer = 0;
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) == 0
-    is_core_pointer = xf86IsCorePointer(local->dev);
-#endif
     /* Is autodev active? */
     int autodev = priv->flags & AUTODEV_FLAG;
     /* Was the device available last time we checked? */

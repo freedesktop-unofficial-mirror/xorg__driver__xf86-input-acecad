@@ -105,12 +105,7 @@ static Bool ConvertProc (InputInfoPtr, int, int, int, int, int, int, int, int, i
 static Bool QueryHardware (AceCadPrivatePtr);
 static void NewPacket (AceCadPrivatePtr priv);
 static Bool AceCadGetPacket (AceCadPrivatePtr);
-#if GET_ABI_MAJOR(ABI_XINPUT_VERSION) < 12
-static InputInfoPtr AceCadPreInit(InputDriverPtr, IDevPtr , int);
-static Bool ReverseConvertProc(InputInfoPtr , int , int , int*);
-#else
 static int AceCadPreInit(InputDriverPtr, InputInfoPtr , int);
-#endif
 #ifdef HAVE_LINUX_INPUT_H
 static void USBReadInput (InputInfoPtr);
 static Bool USBQueryHardware (InputInfoPtr);
