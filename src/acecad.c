@@ -370,6 +370,21 @@ SetupProc_fail:
     return NULL;
 }
 
+static Bool
+ReverseConvertProc (InputInfoPtr local,
+        int x, int  y,
+        int *valuators)
+{
+    AceCadPrivatePtr priv = (AceCadPrivatePtr)(local->private);
+
+    // xf86Msg(X_INFO, "%s: reverse coordinate conversion in : %d, %d\n", local->name, x, y);
+    valuators[0] = x * priv->acecadMaxX / screenInfo.screens[0]->width;
+    valuators[1] = y * priv->acecadMaxY / screenInfo.screens[0]->height;
+    // xf86Msg(X_INFO, "%s: reverse coordinate conversion out: %d, %d\n", local->name, valuators[0], valuators[1]);
+
+    return TRUE;
+}
+
 static int
 NewAceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
 #else
@@ -1067,22 +1082,6 @@ ConvertProc (InputInfoPtr local, int first, int num,
     *x = v0 * screenInfo.screens[0]->width / priv->acecadMaxX;
     *y = v1 * screenInfo.screens[0]->height / priv->acecadMaxY;
     // xf86Msg(X_INFO, "%s: coordinate conversion out: %d, %d\n", local->name, *x, *y);
-    return TRUE;
-}
-
-
-static Bool
-ReverseConvertProc (InputInfoPtr local,
-        int x, int  y,
-        int *valuators)
-{
-    AceCadPrivatePtr priv = (AceCadPrivatePtr)(local->private);
-
-    // xf86Msg(X_INFO, "%s: reverse coordinate conversion in : %d, %d\n", local->name, x, y);
-    valuators[0] = x * priv->acecadMaxX / screenInfo.screens[0]->width;
-    valuators[1] = y * priv->acecadMaxY / screenInfo.screens[0]->height;
-    // xf86Msg(X_INFO, "%s: reverse coordinate conversion out: %d, %d\n", local->name, valuators[0], valuators[1]);
-
     return TRUE;
 }
 
