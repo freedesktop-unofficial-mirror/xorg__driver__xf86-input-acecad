@@ -106,7 +106,7 @@
 /* max number of input events to read in one read call */
 #define MAX_EVENTS 50
 
-static const char *default_options[] =
+static char *default_options[] =
 {
 	"BaudRate", "9600",
 	"StopBits", "1",
