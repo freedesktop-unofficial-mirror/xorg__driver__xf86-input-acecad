@@ -919,7 +919,7 @@ USBReadInput (InputInfoPtr local)
     int x = priv->acecadOldX;
     int y = priv->acecadOldY;
     int z = priv->acecadOldZ;
-    int report_x, report_y;
+    int report_x = 0, report_y = 0;
     int prox = priv->acecadOldProximity;
     int buttons = priv->acecadOldButtons;
     int is_core_pointer = 0;
