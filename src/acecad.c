@@ -343,6 +343,7 @@ AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
         return BadAlloc;
 
     memset(priv, 0, sizeof(AceCadPrivateRec));
+    local->private = priv;
 
     local->device_control = DeviceControl;
 
