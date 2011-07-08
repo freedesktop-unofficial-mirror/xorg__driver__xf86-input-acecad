@@ -346,6 +346,7 @@ AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
     local->private = priv;
 
     local->device_control = DeviceControl;
+    local->type_name = XI_TABLET;
 
     priv->acecadInc = xf86SetIntOption(local->options, "Increment", 0 );
 
