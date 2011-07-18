@@ -471,7 +471,6 @@ SetupProc_fail:
 	if (local)
 		local->private = NULL;
     }
-    xf86DeleteInput(local, 0);
     return BadAlloc;
 }
 
