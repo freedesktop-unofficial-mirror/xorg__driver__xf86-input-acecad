@@ -106,6 +106,7 @@ static Bool QueryHardware (AceCadPrivatePtr);
 static void NewPacket (AceCadPrivatePtr priv);
 static Bool AceCadGetPacket (AceCadPrivatePtr);
 static int AceCadPreInit(InputDriverPtr, InputInfoPtr , int);
+static void AceCadUnInit(InputDriverPtr, InputInfoPtr , int);
 #ifdef HAVE_LINUX_INPUT_H
 static void USBReadInput (InputInfoPtr);
 static Bool USBQueryHardware (InputInfoPtr);

@@ -126,7 +126,7 @@ _X_EXPORT InputDriverRec ACECAD =
 	"acecad",
 	NULL,
 	AceCadPreInit,
-	NULL,
+	AceCadUnInit,
 	NULL,
 	default_options
 };
@@ -462,16 +462,26 @@ AceCadPreInit(InputDriverPtr drv, InputInfoPtr local, int flags)
      * If something went wrong, cleanup and return NULL
      */
 SetupProc_fail:
-    if ((local) && (local->fd))
-        xf86CloseSerial (local->fd);
-    if ((priv) && (priv->buffer))
-        XisbFree (priv->buffer);
-    if (priv) {
-        free (priv);
-	if (local)
-		local->private = NULL;
-    }
     return BadAlloc;
+}
+
+static void
+AceCadUnInit(InputDriverPtr drv, InputInfoPtr local, int flags)
+{
+    AceCadPrivatePtr priv = (AceCadPrivatePtr) (local->private);
+
+    if (local->fd > -1)
+    {
+        xf86CloseSerial (local->fd);
+        local->fd = -1;
+    }
+
+    if (priv) {
+        if (priv->buffer)
+            XisbFree (priv->buffer);
+        free (priv);
+        local->private = NULL;
+    }
 }
 
 static Bool
